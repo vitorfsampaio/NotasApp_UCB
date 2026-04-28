@@ -51,7 +51,7 @@ const LoginView: React.FC<LoginViewProps> = ({
         >
           <Text style={styles.title}>Entrar</Text>
           <Text style={styles.subtitle}>
-            Acesse com seu usuário e senha cadastrados no servidor.
+            Insira seu usuário e senha para acessar suas notas.
           </Text>
           <View style={styles.card}>
             <Text style={styles.label}>Usuário</Text>
