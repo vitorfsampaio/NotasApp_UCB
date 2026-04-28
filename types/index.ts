@@ -16,3 +16,13 @@ export interface SecurityContact {
   name: string;
   phone: string;
 }
+
+export interface AuthUser {
+  id: number;
+  username: string;
+}
+
+export interface AuthSession {
+  token: string;
+  usuario: AuthUser;
+}

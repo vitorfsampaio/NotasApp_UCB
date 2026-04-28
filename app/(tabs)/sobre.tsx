@@ -1,23 +1,44 @@
-import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
+import { useCallback } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import AppHeader from '@/components/AppHeader';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SobreScreen() {
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    router.replace('/login');
+  }, [logout, router]);
+
   return (
     <View style={styles.container}>
       <AppHeader title="Sobre" />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Minhas Notas</Text>
         <Text style={styles.version}>Versão 1.0.0</Text>
-        
-        <Image 
-          source={{ uri: 'https://images.pexels.com/photos/636237/pexels-photo-636237.jpeg' }} 
+
+        <Image
+          source={{
+            uri: 'https://images.pexels.com/photos/636237/pexels-photo-636237.jpeg',
+          }}
           style={styles.image}
           resizeMode="cover"
         />
-        
+
         <Text style={styles.description}>
-          Um aplicativo simples para criar e gerenciar suas anotações pessoais. 
-          Organize suas ideias, listas de compras, tarefas e pensamentos em um só lugar.
+          Um aplicativo simples para criar e gerenciar suas anotações pessoais.
+          Organize suas ideias, listas de compras, tarefas e pensamentos em um só
+          lugar.
         </Text>
 
         <Text style={styles.sectionTitle}>Funcionalidades</Text>
@@ -26,9 +47,13 @@ export default function SobreScreen() {
         <Text style={styles.bullet}>• Interface simples e intuitiva</Text>
         <Text style={styles.bullet}>• Armazenamento local seguro</Text>
         <Text style={styles.bullet}>• Design minimalista</Text>
-        
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Sair da conta</Text>
+        </TouchableOpacity>
+
         <Text style={styles.footer}>
-          © 2025 Minhas Notas. Todos os direitos reservados.
+          © 2026 Minhas Notas. Todos os direitos reservados.
         </Text>
       </ScrollView>
     </View>
@@ -82,6 +107,22 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 8,
     color: '#444',
+  },
+  logoutButton: {
+    marginTop: 24,
+    alignSelf: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    backgroundColor: '#FFF0F0',
+    borderWidth: 1,
+    borderColor: '#FF4136',
+  },
+  logoutText: {
+    color: '#FF4136',
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    textAlign: 'center',
   },
   footer: {
     marginTop: 40,

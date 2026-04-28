@@ -1,9 +1,20 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from util import resposta_api, coordenadas_validas, telefone_valido, verificar_campos
 from http import HTTPStatus
 import twilio_service
 
+from auth_blueprint import bp as auth_bp
+from database import init_db
+
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+init_db()
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
 @app.route('/api/ligacao-emergencia', methods=['POST'])
 def ligacao_emergencia():

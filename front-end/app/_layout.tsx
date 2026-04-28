@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '../hooks/useFrameworkReady';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AuthProvider } from '@/context/AuthContext';
 import { NotesProvider } from '@/context/NotesContext';
 import { SecurityProvider } from '@/context/SecurityContext';
 import { useFonts } from 'expo-font';
@@ -38,16 +39,14 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <SecurityProvider>
-          <NotesProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="nota/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="seguranca/index" options={{ headerShown: false }} />
-            </Stack>
-            <StatusBar style="auto" />
-          </NotesProvider>
-        </SecurityProvider>
+        <AuthProvider>
+          <SecurityProvider>
+            <NotesProvider>
+              <Stack screenOptions={{ headerShown: false }} />
+              <StatusBar style="auto" />
+            </NotesProvider>
+          </SecurityProvider>
+        </AuthProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );
