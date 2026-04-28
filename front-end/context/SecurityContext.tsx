@@ -1,10 +1,20 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Location from 'expo-location';
 import { Alert, Platform } from 'react-native';
 import { SecurityContact } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { enviarLigacaoEmergencia } from '@/utils/api';
+import {
+  evaluateSosModeFromTaps,
+  trimOldTaps,
+} from '@/utils/sosTapEngine';
 
 interface SecurityContextProps {
   safetyKeyword: string;
@@ -19,6 +29,7 @@ interface SecurityContextProps {
   saveSecuritySettings: () => Promise<void>;
   authenticateForSecurityAccess: () => Promise<boolean>;
   checkForKeyword: (text: string) => void;
+  onHeaderSecretTap: () => Promise<void>;
 }
 
 export const SecurityContext = createContext<SecurityContextProps>({
@@ -34,20 +45,19 @@ export const SecurityContext = createContext<SecurityContextProps>({
   saveSecuritySettings: async () => {},
   authenticateForSecurityAccess: async () => false,
   checkForKeyword: () => {},
+  onHeaderSecretTap: async () => {},
 });
 
 interface SecurityProviderProps {
   children: React.ReactNode;
 }
 
-// Persistência: AsyncStorage no mobile, localStorage no web
 const storage = {
   async getItem(key: string): Promise<string | null> {
     if (Platform.OS === 'web') {
       return localStorage.getItem(key);
-    } else {
-      return await AsyncStorage.getItem(key);
     }
+    return await AsyncStorage.getItem(key);
   },
   async setItem(key: string, value: string): Promise<void> {
     if (Platform.OS === 'web') {
@@ -55,17 +65,25 @@ const storage = {
     } else {
       await AsyncStorage.setItem(key, value);
     }
-  }
+  },
 };
 
-export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) => {
+export const SecurityProvider: React.FC<SecurityProviderProps> = ({
+  children,
+}) => {
   const [safetyKeyword, setSafetyKeyword] = useState('');
   const [contacts, setContacts] = useState<SecurityContact[]>([]);
   const [sendLocationEnabled, setSendLocationEnabled] = useState(true);
   const [makeCallEnabled, setMakeCallEnabled] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [lastKnownLatitude, setLastKnownLatitude] = useState<number | null>(
+    null
+  );
+  const [lastKnownLongitude, setLastKnownLongitude] = useState<number | null>(
+    null
+  );
+  const secretTapTimestampsRef = useRef<number[]>([]);
 
-  // Carrega as configurações de segurança
   useEffect(() => {
     const loadSecuritySettings = async () => {
       try {
@@ -75,13 +93,13 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
           setSafetyKeyword(parsedSettings.safetyKeyword || '');
           setContacts(parsedSettings.contacts || []);
           setSendLocationEnabled(
-            parsedSettings.sendLocationEnabled !== undefined 
-              ? parsedSettings.sendLocationEnabled 
+            parsedSettings.sendLocationEnabled !== undefined
+              ? parsedSettings.sendLocationEnabled
               : true
           );
           setMakeCallEnabled(
-            parsedSettings.makeCallEnabled !== undefined 
-              ? parsedSettings.makeCallEnabled 
+            parsedSettings.makeCallEnabled !== undefined
+              ? parsedSettings.makeCallEnabled
               : true
           );
         }
@@ -95,10 +113,9 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
     loadSecuritySettings();
   }, []);
 
-  // Salva as configurações de segurança
   const saveSecuritySettings = useCallback(async () => {
-    if (!isInitialized) return; // Don't save until initialized
-    
+    if (!isInitialized) return;
+
     try {
       const settings = {
         safetyKeyword,
@@ -112,42 +129,37 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
     }
   }, [safetyKeyword, contacts, sendLocationEnabled, makeCallEnabled, isInitialized]);
 
-  // Adiciona um contato de emergência
   const addContact = useCallback((contact: SecurityContact) => {
-    setContacts(prev => [...prev, contact]);
+    setContacts((prev) => [...prev, contact]);
   }, []);
 
-  // Remove um contato de emergência
   const removeContact = useCallback((id: string) => {
-    setContacts(prev => prev.filter(contact => contact.id !== id));
+    setContacts((prev) => prev.filter((contact) => contact.id !== id));
   }, []);
 
-  // Função para autenticar o usuário antes de mostrar menu de segurança
   const authenticateForSecurityAccess = useCallback(async () => {
     if (Platform.OS === 'web') {
-      // Na web, não temos autenticação biométrica, então apenas retornamos true
       return true;
     }
 
     try {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      
+
       if (!hasHardware || !isEnrolled) {
-        // Se não há hardware biométrico ou nenhuma biometria cadastrada
         Alert.alert(
           'Sem autenticação biométrica',
           'Seu dispositivo não tem suporte a autenticação biométrica ou não há nenhuma biometria cadastrada.',
           [{ text: 'OK' }]
         );
-        return true; // Permite acesso mesmo sem biometria
+        return true;
       }
-      
+
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: 'Autenticar para acessar configurações de segurança',
         fallbackLabel: 'Use sua senha',
       });
-      
+
       return result.success;
     } catch (error) {
       console.error('Erro durante autenticação:', error);
@@ -155,74 +167,142 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
     }
   }, []);
 
-  // Verifica se o texto contém a palavra-chave de segurança
-  const checkForKeyword = useCallback(async (text: string) => {
-    if (!safetyKeyword || safetyKeyword.length < 3) return;
-
-    // Verifica se o texto contém a palavra-chave de segurança
-    if (text.toLowerCase().includes(safetyKeyword.toLowerCase())) {
-      // Executa ações de emergência
-      triggerEmergencyProtocol();
-    }
-  }, [safetyKeyword]);
-
-  // Protocolo de emergência
-  const triggerEmergencyProtocol = useCallback(async () => {
-    if (contacts.length === 0) {
-      Alert.alert('Emergência', 'Nenhum contato de emergência cadastrado.');
-      return;
-    }
-
-    try {
-      let latitude = null;
-      let longitude = null;
-      let nome = 'Usuário';
-
-      if (sendLocationEnabled) {
-        try {
-          const { status } = await Location.requestForegroundPermissionsAsync();
-          if (status === 'granted') {
-            const location = await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.High,
-            });
-            latitude = location.coords.latitude;
-            longitude = location.coords.longitude;
-          }
-        } catch (error) {
-          console.error('Erro ao obter localização:', error);
+  const runEmergencyProtocol = useCallback(
+    async (silentSuccess: boolean) => {
+      if (contacts.length === 0) {
+        if (!silentSuccess) {
+          Alert.alert(
+            'Emergência',
+            'Nenhum contato de emergência cadastrado.'
+          );
         }
-      }
-
-      const contato = contacts[0];
-      if (!contato) {
-        Alert.alert('Emergência', 'Nenhum contato de emergência cadastrado.');
         return;
       }
 
-      // Chama o backend
       try {
+        let latitude: number | null = null;
+        let longitude: number | null = null;
+        let gpsIndisponivel = false;
+        const nome = contacts[0]?.name || 'Usuário';
+
+        if (sendLocationEnabled) {
+          try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status === 'granted') {
+              const location = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High,
+              });
+              latitude = location.coords.latitude;
+              longitude = location.coords.longitude;
+              setLastKnownLatitude(latitude);
+              setLastKnownLongitude(longitude);
+            } else {
+              if (
+                lastKnownLatitude !== null &&
+                lastKnownLongitude !== null
+              ) {
+                latitude = lastKnownLatitude;
+                longitude = lastKnownLongitude;
+              } else {
+                gpsIndisponivel = true;
+                latitude = 0;
+                longitude = 0;
+              }
+            }
+          } catch {
+            if (
+              lastKnownLatitude !== null &&
+              lastKnownLongitude !== null
+            ) {
+              latitude = lastKnownLatitude;
+              longitude = lastKnownLongitude;
+            } else {
+              gpsIndisponivel = true;
+              latitude = 0;
+              longitude = 0;
+            }
+          }
+        } else {
+          latitude = 0;
+          longitude = 0;
+          gpsIndisponivel = true;
+        }
+
+        const contato = contacts[0];
+        if (!contato) {
+          if (!silentSuccess) {
+            Alert.alert(
+              'Emergência',
+              'Nenhum contato de emergência cadastrado.'
+            );
+          }
+          return;
+        }
+
         await enviarLigacaoEmergencia({
           numero: contato.phone,
           latitude: latitude ?? 0,
           longitude: longitude ?? 0,
-          nome: contato.name || 'Usuário',
+          nome,
+          gps_indisponivel: gpsIndisponivel,
         });
-        Alert.alert('Emergência', 'Ligação e SMS de emergência enviados com sucesso!');
-      } catch (error: any) {
-        Alert.alert('Erro', error.message || 'Erro ao acionar emergência.');
-      }
-    } catch (error) {
-      console.error('Erro no protocolo de emergência:', error);
-      Alert.alert('Erro', 'Erro inesperado ao acionar emergência.');
-    }
-  }, [contacts, sendLocationEnabled]);
 
-  // Save security settings whenever any of the relevant states change
+        if (!silentSuccess) {
+          Alert.alert(
+            'Emergência',
+            'Ligação e SMS de emergência enviados com sucesso!'
+          );
+        }
+      } catch (error: unknown) {
+        const msg =
+          error instanceof Error ? error.message : 'Erro ao acionar emergência.';
+        Alert.alert('Erro', msg);
+      }
+    },
+    [
+      contacts,
+      sendLocationEnabled,
+      lastKnownLatitude,
+      lastKnownLongitude,
+    ]
+  );
+
+  const checkForKeyword = useCallback(
+    (text: string) => {
+      if (!safetyKeyword || safetyKeyword.length < 3) return;
+
+      if (text.toLowerCase().includes(safetyKeyword.toLowerCase())) {
+        void runEmergencyProtocol(false);
+      }
+    },
+    [safetyKeyword, runEmergencyProtocol]
+  );
+
+  const onHeaderSecretTap = useCallback(async () => {
+    const now = Date.now();
+    secretTapTimestampsRef.current = trimOldTaps(
+      [...secretTapTimestampsRef.current, now],
+      now
+    );
+    const mode = evaluateSosModeFromTaps(secretTapTimestampsRef.current, now);
+    if (mode === 'active') {
+      secretTapTimestampsRef.current = [];
+      await runEmergencyProtocol(true);
+    }
+  }, [runEmergencyProtocol]);
+
   useEffect(() => {
     if (isInitialized) {
       saveSecuritySettings();
     }
-  }, [safetyKeyword, contacts, sendLocationEnabled, makeCallEnabled, isInitialized]);
+  }, [
+    safetyKeyword,
+    contacts,
+    sendLocationEnabled,
+    makeCallEnabled,
+    isInitialized,
+    saveSecuritySettings,
+  ]);
 
   return (
     <SecurityContext.Provider
@@ -239,6 +319,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
         saveSecuritySettings,
         authenticateForSecurityAccess,
         checkForKeyword,
+        onHeaderSecretTap,
       }}
     >
       {children}
