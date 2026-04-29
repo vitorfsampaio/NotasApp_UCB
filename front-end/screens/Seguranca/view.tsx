@@ -66,7 +66,11 @@ const SegurancaView: React.FC<SegurancaViewProps> = ({
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
+          <TouchableOpacity
+            testID="e2e_seguranca_back"
+            onPress={onBack}
+            style={styles.backButton}
+          >
             <ArrowLeft size={24} color="#0074D9" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Configurações de Segurança</Text>
@@ -120,7 +124,8 @@ const SegurancaView: React.FC<SegurancaViewProps> = ({
           <View style={styles.section}>
             <View style={styles.contactsHeader}>
               <Text style={styles.sectionTitle}>Contatos de Emergência</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
+                testID="e2e_seguranca_add_contact"
                 style={styles.addContactButton}
                 onPress={() => setShowAddContact(!showAddContact)}
               >
@@ -130,6 +135,7 @@ const SegurancaView: React.FC<SegurancaViewProps> = ({
             {showAddContact && (
               <Animated.View style={styles.addContactContainer}>
                 <TextInput
+                  testID="e2e_contact_name"
                   style={styles.contactInput}
                   value={newContactName}
                   onChangeText={setNewContactName}
@@ -137,6 +143,7 @@ const SegurancaView: React.FC<SegurancaViewProps> = ({
                   placeholderTextColor="#9E9E9E"
                 />
                 <TextInput
+                  testID="e2e_contact_phone"
                   style={styles.contactInput}
                   value={maskedPhone}
                   onChangeText={handlePhoneChange}
@@ -145,6 +152,7 @@ const SegurancaView: React.FC<SegurancaViewProps> = ({
                   keyboardType="phone-pad"
                 />
                 <TouchableOpacity
+                  testID="e2e_contact_save"
                   style={styles.saveContactButton}
                   onPress={handleAddContact}
                 >

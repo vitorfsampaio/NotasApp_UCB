@@ -56,6 +56,7 @@ const LoginView: React.FC<LoginViewProps> = ({
           <View style={styles.card}>
             <Text style={styles.label}>Usuário</Text>
             <TextInput
+              testID="e2e_login_username"
               style={styles.input}
               value={username}
               onChangeText={onUsernameChange}
@@ -68,6 +69,7 @@ const LoginView: React.FC<LoginViewProps> = ({
             />
             <Text style={styles.label}>Senha</Text>
             <TextInput
+              testID="e2e_login_password"
               style={styles.input}
               value={password}
               onChangeText={onPasswordChange}
@@ -81,6 +83,7 @@ const LoginView: React.FC<LoginViewProps> = ({
               <Text style={styles.error}>{errorMessage}</Text>
             ) : null}
             <TouchableOpacity
+              testID="e2e_login_submit"
               style={[styles.primaryOuter, loading && styles.primaryDisabled]}
               onPress={onSubmit}
               disabled={loading}

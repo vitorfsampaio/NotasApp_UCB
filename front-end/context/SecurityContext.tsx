@@ -7,9 +7,10 @@ import React, {
 } from 'react';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Location from 'expo-location';
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, View } from 'react-native';
 import { SecurityContact } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isE2eBuild } from '@/constants/e2e';
 import { enviarLigacaoEmergencia } from '@/utils/api';
 import {
   evaluateSosModeFromTaps,
@@ -82,6 +83,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   const [lastKnownLongitude, setLastKnownLongitude] = useState<number | null>(
     null
   );
+  const [e2eEmergencySucceeded, setE2eEmergencySucceeded] = useState(false);
   const secretTapTimestampsRef = useRef<number[]>([]);
 
   useEffect(() => {
@@ -247,10 +249,15 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
           gps_indisponivel: gpsIndisponivel,
         });
 
-        if (!silentSuccess) {
+        if (isE2eBuild()) {
+          setE2eEmergencySucceeded(true);
+        }
+
+        if (!silentSuccess || isE2eBuild()) {
           Alert.alert(
             'Emergência',
-            'Ligação e SMS de emergência enviados com sucesso!'
+            'Ligação e SMS de emergência enviados com sucesso!',
+            [{ text: 'OK' }]
           );
         }
       } catch (error: unknown) {
@@ -322,7 +329,27 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
         onHeaderSecretTap,
       }}
     >
-      {children}
+      <>
+        {children}
+        {isE2eBuild() && e2eEmergencySucceeded ? (
+          <View
+            testID="e2e_emergency_success"
+            accessibilityLabel="e2e_emergency_success"
+            accessible
+            collapsable={false}
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              width: 8,
+              height: 8,
+              opacity: 1,
+              left: 0,
+              top: 0,
+              zIndex: 99999,
+            }}
+          />
+        ) : null}
+      </>
     </SecurityContext.Provider>
   );
 };

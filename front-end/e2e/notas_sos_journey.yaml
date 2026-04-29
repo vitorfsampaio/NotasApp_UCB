@@ -1,0 +1,82 @@
+appId: com.notasapp
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      text: Entrar
+    timeout: 90000
+- tapOn:
+    id: e2e_login_username
+- inputText: ${MAESTRO_LOGIN_USER}
+- tapOn:
+    id: e2e_login_password
+- inputText: ${MAESTRO_LOGIN_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: e2e_login_submit
+- extendedWaitUntil:
+    visible:
+      id: e2e_sos_header
+    timeout: 90000
+- longPressOn:
+    id: e2e_sos_header
+- runFlow:
+    when:
+      visible: OK
+    commands:
+      - tapOn: OK
+- extendedWaitUntil:
+    visible:
+      text: Configurações de Segurança
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: e2e_seguranca_add_contact
+    direction: DOWN
+- tapOn:
+    id: e2e_seguranca_add_contact
+- extendedWaitUntil:
+    visible:
+      id: e2e_contact_name
+    timeout: 10000
+- tapOn:
+    id: e2e_contact_name
+- inputText: Contato E2E
+- tapOn:
+    id: e2e_contact_phone
+- eraseText
+- inputText: ${MAESTRO_CONTACT_PHONE}
+- hideKeyboard
+- tapOn:
+    id: e2e_contact_save
+- tapOn:
+    id: e2e_seguranca_back
+- extendedWaitUntil:
+    visible:
+      id: e2e_sos_header
+    timeout: 15000
+- tapOn:
+    id: e2e_sos_header
+    repeat: 5
+    delay: 280
+- runFlow:
+    when:
+      visible: Permitir
+    commands:
+      - tapOn: Permitir
+- runFlow:
+    when:
+      visible: Permitir durante o uso do app
+    commands:
+      - tapOn: Permitir durante o uso do app
+- runFlow:
+    when:
+      visible: Apenas desta vez
+    commands:
+      - tapOn: Apenas desta vez
+- extendedWaitUntil:
+    visible:
+      text: 'Ligação e SMS de emergência enviados com sucesso!'
+    timeout: 120000
+- tapOn: OK

@@ -3,7 +3,8 @@ import sqlite3
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = os.environ.get('DATABASE_PATH', str(BASE_DIR / 'notas_app.db'))
+_env_db = (os.environ.get('DATABASE_PATH') or '').strip()
+DB_PATH = _env_db if _env_db else str(BASE_DIR / 'notas_app.db')
 
 
 def get_connection() -> sqlite3.Connection:

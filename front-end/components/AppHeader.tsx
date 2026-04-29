@@ -38,6 +38,7 @@ export default function AppHeader({ title }: AppHeaderProps) {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <View style={styles.container}>
         <TouchableOpacity
+          testID="e2e_sos_header"
           onPress={handleTitlePress}
           onLongPress={handleTitleLongPress}
           delayLongPress={650}
