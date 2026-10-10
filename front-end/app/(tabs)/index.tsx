@@ -1,3 +1,3 @@
-import NotasScreen from '@/screens/Notas';
+import InicioScreen from '@/screens/Inicio';
 
-export default NotasScreen;
+export default InicioScreen;

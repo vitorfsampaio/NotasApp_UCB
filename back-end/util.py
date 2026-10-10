@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from http import HTTPStatus
 import re
 
@@ -32,6 +33,20 @@ def telefone_valido(numero):
 
 def criar_link_maps(latitude, longitude):
     return f"https://www.google.com/maps?q={latitude},{longitude}"
+
+def parse_iso_datetime(value) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    raw = value.strip()
+    if raw.endswith('Z'):
+        raw = raw[:-1] + '+00:00'
+    try:
+        parsed = datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
 
 def verificar_campos(numero, latitude, longitude, nome):
     if numero is None or (isinstance(numero, str) and str(numero).strip() == ''):

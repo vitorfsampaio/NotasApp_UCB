@@ -1,7 +1,6 @@
 import { Redirect, Tabs } from 'expo-router';
-import { FileText, Home } from 'lucide-react-native';
-import { StyleSheet } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
+import PlanifyTabBar from '@/components/PlanifyTabBar';
 import { colors } from '@/constants/theme';
 
 export default function TabLayout() {
@@ -11,49 +10,22 @@ export default function TabLayout() {
     return null;
   }
   if (!token) {
-    return <Redirect href="/onboarding" />;
+    return <Redirect href='/onboarding' />;
   }
   if (!onboardingCompleted) {
-    return <Redirect href="/onboarding" />;
+    return <Redirect href='/onboarding' />;
   }
 
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: colors.text,
-        tabBarInactiveTintColor: colors.tabInactive,
-        tabBarStyle: styles.tabBar,
-        headerShown: false,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Notas',
-          tabBarIcon: ({ color, size }) => (
-            <FileText size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="sobre"
-        options={{
-          title: 'Sobre',
-          tabBarIcon: ({ color, size }) => (
-            <Home size={size} color={color} />
-          ),
-        }}
-      />
+      tabBar={(props) => <PlanifyTabBar {...props} />}
+      sceneContainerStyle={{ backgroundColor: colors.background }}
+      screenOptions={{ headerShown: false }}
+    >
+      <Tabs.Screen name='index' options={{ title: 'Início' }} />
+      <Tabs.Screen name='agenda' options={{ title: 'Agenda' }} />
+      <Tabs.Screen name='notas' options={{ title: 'Notas' }} />
+      <Tabs.Screen name='perfil' options={{ title: 'Perfil' }} />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: colors.background,
-    borderTopColor: colors.text,
-    borderTopWidth: 1,
-    paddingTop: 6,
-    paddingBottom: 8,
-    height: 60,
-  },
-});

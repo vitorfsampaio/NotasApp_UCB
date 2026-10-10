@@ -11,6 +11,9 @@ import twilio_service
 from auth_blueprint import bp as auth_bp
 from notes_blueprint import bp as notes_bp
 from onboarding_blueprint import bp as onboarding_bp
+from tasks_blueprint import bp as tasks_bp
+from events_blueprint import bp as events_bp
+from projects_blueprint import bp as projects_bp
 from database import init_db
 
 app = Flask(__name__)
@@ -19,6 +22,9 @@ init_db()
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(notes_bp, url_prefix='/api/notes')
 app.register_blueprint(onboarding_bp, url_prefix='/api/onboarding')
+app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
+app.register_blueprint(events_bp, url_prefix='/api/events')
+app.register_blueprint(projects_bp, url_prefix='/api/projects')
 
 @app.route('/api/ligacao-emergencia', methods=['POST'])
 def ligacao_emergencia():

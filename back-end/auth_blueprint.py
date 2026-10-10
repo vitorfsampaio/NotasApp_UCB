@@ -3,6 +3,8 @@ from http import HTTPStatus
 from psycopg.errors import UniqueViolation
 
 from auth_service import (
+  MAIN_FOCUSES,
+  USAGE_TYPES,
   create_access_token,
   create_user,
   get_user_by_username,
@@ -26,6 +28,8 @@ def register():
   username = username_raw.strip() if isinstance(username_raw, str) else ''
   password = password_raw if isinstance(password_raw, str) else ''
   full_name = full_name_raw.strip() if isinstance(full_name_raw, str) else ''
+  usage_type = data.get('usageType')
+  main_focus = data.get('mainFocus')
 
   if not username or not password:
     code = HTTPStatus.BAD_REQUEST
@@ -44,12 +48,20 @@ def register():
     code = HTTPStatus.BAD_REQUEST
     return jsonify(resposta_api(code, "A senha deve ter pelo menos 6 caracteres.")), code
 
+  if usage_type not in USAGE_TYPES:
+    code = HTTPStatus.BAD_REQUEST
+    return jsonify(resposta_api(code, "Escolha para que você vai usar o app.")), code
+
+  if main_focus not in MAIN_FOCUSES:
+    code = HTTPStatus.BAD_REQUEST
+    return jsonify(resposta_api(code, "Escolha o que quer organizar primeiro.")), code
+
   if get_user_by_username(username):
     code = HTTPStatus.CONFLICT
     return jsonify(resposta_api(code, "Este nome de usuário já está em uso.")), code
 
   try:
-    user_id = create_user(username, password, full_name)
+    user_id = create_user(username, password, full_name, usage_type, main_focus)
   except UniqueViolation:
     code = HTTPStatus.CONFLICT
     return jsonify(resposta_api(code, "Este nome de usuário já está em uso.")), code
@@ -66,6 +78,8 @@ def register():
           'username': username,
           'fullName': full_name,
           'onboardingCompleted': False,
+          'usageType': usage_type,
+          'mainFocus': main_focus,
         },
       }
     ),

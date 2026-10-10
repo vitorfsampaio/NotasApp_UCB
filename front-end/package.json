@@ -14,6 +14,7 @@
     "e2e": "node scripts/run-maestro-e2e.cjs"
   },
   "dependencies": {
+    "@expo-google-fonts/caveat": "^0.2.3",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/vector-icons": "^14.0.0",
@@ -51,7 +52,8 @@
     "react-native-svg": "14.1.0",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.19.6",
-    "react-native-webview": "13.6.4"
+    "react-native-webview": "13.6.4",
+    "expo-notifications": "~0.27.8"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

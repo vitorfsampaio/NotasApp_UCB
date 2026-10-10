@@ -1,9 +1,10 @@
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { ChevronRight } from 'lucide-react-native';
 import { Note } from '../types';
 import { getRelativeTime } from '../utils/dateUtils';
-import { colors, fonts } from '@/constants/theme';
+import { colors, fonts, shadows } from '@/constants/theme';
 
 interface NoteItemProps {
   note: Note;
@@ -23,16 +24,19 @@ export default function NoteItem({ note }: NoteItemProps) {
       onPress={handlePress}
       activeOpacity={0.85}
     >
-      <View style={styles.top}>
+      <View style={styles.header}>
         <Text style={styles.title} numberOfLines={1}>
           {note.title}
         </Text>
-        <Text style={styles.preview} numberOfLines={4}>
+        <ChevronRight size={18} color={colors.textMuted} />
+      </View>
+      {note.content ? (
+        <Text style={styles.preview} numberOfLines={3}>
           {note.content}
         </Text>
-      </View>
+      ) : null}
       <View style={styles.footer}>
-        <View style={styles.accentBar} />
+        <View style={styles.dot} />
         <Text style={styles.date}>{getRelativeTime(note.updatedAt)}</Text>
       </View>
     </TouchableOpacity>
@@ -41,49 +45,44 @@ export default function NoteItem({ note }: NoteItemProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 7,
-    marginBottom: 18,
-    overflow: 'hidden',
-    elevation: 4,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    borderRadius: 16,
+    marginBottom: 12,
+    padding: 16,
+    backgroundColor: colors.surface,
+    ...shadows.soft,
   },
-  top: {
-    backgroundColor: colors.backgroundSoft,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 20,
-    minHeight: 140,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   title: {
-    fontSize: 20,
+    flex: 1,
+    fontSize: 15,
     fontFamily: fonts.semiBold,
     color: colors.text,
-    marginBottom: 10,
   },
   preview: {
-    fontSize: 15,
+    marginTop: 6,
+    fontSize: 13,
     fontFamily: fonts.regular,
     color: colors.textSecondary,
-    lineHeight: 22,
+    lineHeight: 19,
   },
   footer: {
-    backgroundColor: colors.card,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
   },
-  accentBar: {
-    width: 88,
-    height: 10,
-    borderRadius: 4,
-    backgroundColor: colors.cardAccent,
-    marginBottom: 10,
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.sageDot,
+    marginRight: 6,
   },
   date: {
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: fonts.medium,
-    color: colors.tabInactive,
+    color: colors.textMuted,
   },
 });

@@ -16,6 +16,11 @@ from database import get_connection
 from util import resposta_api
 
 USERNAME_PATTERN = re.compile(r'^[a-zA-Z0-9_]{3,32}$')
+USAGE_TYPES = {'personal', 'professional', 'studies', 'family'}
+MAIN_FOCUSES = {'tasks', 'schedule', 'projects', 'notes'}
+USER_COLUMNS = (
+  'id, username, password_hash, full_name, onboarding_completed, usage_type, main_focus'
+)
 
 
 class UserRecord(TypedDict):
@@ -24,6 +29,8 @@ class UserRecord(TypedDict):
   password_hash: str
   full_name: str
   onboarding_completed: bool
+  usage_type: str
+  main_focus: str
 
 
 def jwt_secret() -> str:
@@ -55,6 +62,20 @@ def serialize_user(user: UserRecord) -> dict:
     'username': user['username'],
     'fullName': user['full_name'],
     'onboardingCompleted': user['onboarding_completed'],
+    'usageType': user['usage_type'] or None,
+    'mainFocus': user['main_focus'] or None,
+  }
+
+
+def _row_to_user(row: dict) -> UserRecord:
+  return {
+    'id': row['id'],
+    'username': row['username'],
+    'password_hash': row['password_hash'],
+    'full_name': row['full_name'] or '',
+    'onboarding_completed': bool(row['onboarding_completed']),
+    'usage_type': row['usage_type'] or '',
+    'main_focus': row['main_focus'] or '',
   }
 
 
@@ -63,8 +84,8 @@ def get_user_by_username(username: str) -> UserRecord | None:
   try:
     with conn.cursor() as cur:
       cur.execute(
-        """
-        SELECT id, username, password_hash, full_name, onboarding_completed
+        f"""
+        SELECT {USER_COLUMNS}
         FROM users
         WHERE username = %s
         """,
@@ -73,13 +94,7 @@ def get_user_by_username(username: str) -> UserRecord | None:
       row = cur.fetchone()
     if row is None:
       return None
-    return {
-      'id': row['id'],
-      'username': row['username'],
-      'password_hash': row['password_hash'],
-      'full_name': row['full_name'] or '',
-      'onboarding_completed': bool(row['onboarding_completed']),
-    }
+    return _row_to_user(row)
   finally:
     conn.close()
 
@@ -89,8 +104,8 @@ def get_user_by_id(user_id: int) -> UserRecord | None:
   try:
     with conn.cursor() as cur:
       cur.execute(
-        """
-        SELECT id, username, password_hash, full_name, onboarding_completed
+        f"""
+        SELECT {USER_COLUMNS}
         FROM users
         WHERE id = %s
         """,
@@ -99,18 +114,18 @@ def get_user_by_id(user_id: int) -> UserRecord | None:
       row = cur.fetchone()
     if row is None:
       return None
-    return {
-      'id': row['id'],
-      'username': row['username'],
-      'password_hash': row['password_hash'],
-      'full_name': row['full_name'] or '',
-      'onboarding_completed': bool(row['onboarding_completed']),
-    }
+    return _row_to_user(row)
   finally:
     conn.close()
 
 
-def create_user(username: str, password: str, full_name: str = '') -> int:
+def create_user(
+  username: str,
+  password: str,
+  full_name: str = '',
+  usage_type: str = '',
+  main_focus: str = '',
+) -> int:
   now = datetime.now(timezone.utc).isoformat()
   pwd_hash = hash_password(password)
   conn = get_connection()
@@ -118,11 +133,14 @@ def create_user(username: str, password: str, full_name: str = '') -> int:
     with conn.cursor() as cur:
       cur.execute(
         """
-        INSERT INTO users (username, password_hash, full_name, onboarding_completed, created_at)
-        VALUES (%s, %s, %s, FALSE, %s)
+        INSERT INTO users (
+          username, password_hash, full_name, onboarding_completed,
+          usage_type, main_focus, created_at
+        )
+        VALUES (%s, %s, %s, FALSE, %s, %s, %s)
         RETURNING id
         """,
-        (username, pwd_hash, full_name.strip(), now),
+        (username, pwd_hash, full_name.strip(), usage_type, main_focus, now),
       )
       row = cur.fetchone()
     conn.commit()
@@ -146,11 +164,11 @@ def complete_onboarding(user_id: int) -> UserRecord | None:
   try:
     with conn.cursor() as cur:
       cur.execute(
-        """
+        f"""
         UPDATE users
         SET onboarding_completed = TRUE
         WHERE id = %s
-        RETURNING id, username, password_hash, full_name, onboarding_completed
+        RETURNING {USER_COLUMNS}
         """,
         (user_id,),
       )
@@ -158,13 +176,7 @@ def complete_onboarding(user_id: int) -> UserRecord | None:
     conn.commit()
     if row is None:
       return None
-    return {
-      'id': row['id'],
-      'username': row['username'],
-      'password_hash': row['password_hash'],
-      'full_name': row['full_name'] or '',
-      'onboarding_completed': bool(row['onboarding_completed']),
-    }
+    return _row_to_user(row)
   finally:
     conn.close()
 

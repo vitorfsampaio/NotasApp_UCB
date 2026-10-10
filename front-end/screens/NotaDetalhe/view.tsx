@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Trash2, Plus } from 'lucide-react-native';
+import { View, TextInput, StyleSheet } from 'react-native';
+import { Check, Trash2 } from 'lucide-react-native';
 import PlanifyBackground from '@/components/PlanifyBackground';
-import { colors, fonts } from '@/constants/theme';
+import AppHeader from '@/components/AppHeader';
+import IconButton from '@/components/IconButton';
+import { colors, fonts, shadows } from '@/constants/theme';
 
 interface NotaDetalheViewProps {
   title: string;
@@ -27,128 +28,84 @@ const NotaDetalheView: React.FC<NotaDetalheViewProps> = ({
   onAddNote,
 }) => (
   <PlanifyBackground>
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={onBack}
-            style={styles.backButton}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+    <AppHeader
+      title={isNewNote ? 'Nova nota' : 'Editar nota'}
+      subtitle='Salva automaticamente ao voltar.'
+      onBack={onBack}
+      enableSecretAccess={false}
+      rightAction={
+        isNewNote ? (
+          <IconButton
+            variant='square'
+            onPress={onAddNote}
+            accessibilityLabel='Salvar nota'
           >
-            <ArrowLeft size={28} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>
-            {isNewNote ? 'Nova Nota' : 'Editar Nota'}
-          </Text>
-          {isNewNote ? (
-            <TouchableOpacity
-              onPress={onAddNote}
-              style={styles.addButton}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            >
-              <Plus size={26} color={colors.white} />
-            </TouchableOpacity>
-          ) : onDelete ? (
-            <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-              <Trash2 size={22} color={colors.error} />
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.spacer} />
-          )}
-        </View>
-        <View style={styles.form}>
-          <TextInput
-            style={styles.titleInput}
-            value={title}
-            onChangeText={onTitleChange}
-            placeholder="Título da nota"
-            placeholderTextColor={colors.textMuted}
-            selectionColor={colors.buttonSolid}
-            autoFocus={isNewNote}
-          />
-          <TextInput
-            style={styles.contentInput}
-            value={content}
-            onChangeText={onContentChange}
-            placeholder={isNewNote ? 'Digite sua nota...' : 'Edite sua nota...'}
-            placeholderTextColor={colors.textMuted}
-            selectionColor={colors.buttonSolid}
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
-      </View>
-    </SafeAreaView>
+            <Check size={19} color={colors.text} />
+          </IconButton>
+        ) : onDelete ? (
+          <IconButton
+            variant='square'
+            onPress={onDelete}
+            accessibilityLabel='Excluir nota'
+          >
+            <Trash2 size={18} color={colors.error} />
+          </IconButton>
+        ) : null
+      }
+    />
+    <View style={styles.form}>
+      <TextInput
+        style={styles.titleInput}
+        value={title}
+        onChangeText={onTitleChange}
+        placeholder='Título da nota'
+        placeholderTextColor={colors.textMuted}
+        selectionColor={colors.buttonSolid}
+        autoFocus={isNewNote}
+      />
+      <TextInput
+        style={styles.contentInput}
+        value={content}
+        onChangeText={onContentChange}
+        placeholder={isNewNote ? 'Digite sua nota...' : 'Edite sua nota...'}
+        placeholderTextColor={colors.textMuted}
+        selectionColor={colors.buttonSolid}
+        multiline
+        textAlignVertical='top'
+      />
+    </View>
   </PlanifyBackground>
 );
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  container: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  backButton: {
-    padding: 12,
-    minWidth: 44,
-    minHeight: 44,
-    borderRadius: 22,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addButton: {
-    padding: 12,
-    minWidth: 44,
-    minHeight: 44,
-    borderRadius: 22,
-    backgroundColor: colors.buttonSolid,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: fonts.bold,
-    color: colors.text,
-    flex: 1,
-    textAlign: 'center',
-  },
-  deleteButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: colors.white,
-  },
-  spacer: { width: 44 },
   form: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 16,
   },
   titleInput: {
-    fontSize: 22,
-    fontFamily: fonts.bold,
+    fontSize: 20,
+    fontFamily: fonts.semiBold,
     color: colors.text,
     marginBottom: 12,
-    backgroundColor: colors.white,
-    borderRadius: 100,
-    paddingHorizontal: 20,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    paddingHorizontal: 18,
     paddingVertical: 14,
+    ...shadows.soft,
   },
   contentInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
+    lineHeight: 22,
     fontFamily: fonts.regular,
     color: colors.text,
-    backgroundColor: colors.white,
-    borderRadius: 24,
-    padding: 20,
+    backgroundColor: colors.surface,
+    borderRadius: 18,
+    padding: 18,
     textAlignVertical: 'top',
-    marginBottom: 20,
+    marginBottom: 28,
+    ...shadows.soft,
   },
 });
 

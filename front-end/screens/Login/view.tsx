@@ -12,7 +12,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PlanifyBackground from '@/components/PlanifyBackground';
+import HandwrittenNote from '@/components/HandwrittenNote';
+import AuthHero from '@/components/AuthHero';
 import { colors, fonts, radii, shadows } from '@/constants/theme';
+
+const loginHighlights = ['Tarefas do dia', 'Agenda', 'Lembretes'];
 
 interface LoginViewProps {
   username: string;
@@ -35,43 +39,55 @@ const LoginView: React.FC<LoginViewProps> = ({
   loading,
   errorMessage,
 }) => (
-  <PlanifyBackground>
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
+  <PlanifyBackground showLeaves>
+    <SafeAreaView
+      style={styles.safe}
+      edges={['top', 'bottom', 'left', 'right']}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.flex}
       >
         <ScrollView
           contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
         >
+          <AuthHero
+            tagline='Planeje hoje. Construa amanhã.'
+            highlights={loginHighlights}
+          />
           <View style={styles.header}>
+            <HandwrittenNote
+              lines={['Pequenos passos', 'Grandes resultados']}
+              accent='arrow'
+              style={styles.note}
+            />
             <Text style={styles.title}>Bem-vindo de volta!</Text>
             <Text style={styles.subtitle}>
-              Entre para continuar suas anotações.
+              Entre para continuar organizando seu dia.
             </Text>
           </View>
 
           <View style={styles.card}>
             <TextInput
-              testID="e2e_login_username"
+              testID='e2e_login_username'
               style={styles.input}
               value={username}
               onChangeText={onUsernameChange}
-              placeholder="Nome de usuário"
+              placeholder='Nome de usuário'
               placeholderTextColor={colors.textMuted}
               selectionColor={colors.buttonSolid}
-              autoCapitalize="none"
+              autoCapitalize='none'
               autoCorrect={false}
               editable={!loading}
             />
             <TextInput
-              testID="e2e_login_password"
+              testID='e2e_login_password'
               style={styles.input}
               value={password}
               onChangeText={onPasswordChange}
-              placeholder="Insira sua senha"
+              placeholder='Insira sua senha'
               placeholderTextColor={colors.textMuted}
               selectionColor={colors.buttonSolid}
               secureTextEntry
@@ -82,7 +98,7 @@ const LoginView: React.FC<LoginViewProps> = ({
             ) : null}
 
             <TouchableOpacity
-              testID="e2e_login_submit"
+              testID='e2e_login_submit'
               style={[styles.button, loading && styles.buttonDisabled]}
               onPress={onSubmit}
               disabled={loading}
@@ -116,72 +132,68 @@ const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 56,
+    paddingTop: 20,
     paddingBottom: 36,
     justifyContent: 'center',
   },
   header: {
-    marginBottom: 28,
-    paddingHorizontal: 8,
+    marginTop: 20,
+    marginBottom: 24,
+  },
+  note: {
+    marginBottom: 16,
   },
   title: {
     fontFamily: fonts.bold,
     fontSize: 30,
     color: colors.text,
-    textAlign: 'center',
-    marginBottom: 10,
+    letterSpacing: -0.6,
+    marginBottom: 6,
   },
   subtitle: {
-    fontFamily: fonts.medium,
-    fontSize: 16,
-    lineHeight: 24,
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    lineHeight: 22,
     color: colors.textSecondary,
-    textAlign: 'center',
   },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: colors.surface,
     borderRadius: radii.card,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.55)',
-    gap: 14,
+    padding: 18,
+    gap: 12,
     ...shadows.soft,
   },
   input: {
-    backgroundColor: colors.input,
-    height: 56,
+    backgroundColor: colors.surfaceMuted,
+    height: 52,
     borderRadius: radii.input,
-    paddingHorizontal: 22,
-    fontSize: 16,
-    fontFamily: fonts.medium,
+    paddingHorizontal: 18,
+    fontSize: 15,
+    fontFamily: fonts.regular,
     color: colors.text,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.inputBorder,
-    ...shadows.soft,
   },
   error: {
     color: colors.error,
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: fonts.medium,
     textAlign: 'center',
   },
   button: {
-    marginTop: 8,
+    marginTop: 6,
     backgroundColor: colors.button,
-    height: 56,
+    height: 54,
     borderRadius: radii.button,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.buttonBorder,
     ...shadows.button,
   },
   buttonDisabled: { opacity: 0.7 },
   buttonText: {
     fontFamily: fonts.semiBold,
-    fontSize: 18,
+    fontSize: 15,
     color: colors.white,
-    letterSpacing: 0.3,
   },
   linkWrap: {
     marginTop: 28,
@@ -189,9 +201,8 @@ const styles = StyleSheet.create({
   },
   link: {
     fontFamily: fonts.semiBold,
-    fontSize: 16,
+    fontSize: 14,
     color: colors.text,
-    textDecorationLine: 'underline',
   },
 });
 

@@ -4,12 +4,12 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import AppHeader from '@/components/AppHeader';
-import EmptyNotes from '@/components/EmptyNotes';
-import { Plus } from 'lucide-react-native';
+import EmptyState from '@/components/EmptyState';
+import IconButton from '@/components/IconButton';
+import { FilePlus, Plus } from 'lucide-react-native';
 import { Note } from './model';
 import PlanifyBackground from '@/components/PlanifyBackground';
 import { colors } from '@/constants/theme';
@@ -30,10 +30,22 @@ const NotasView: React.FC<NotasViewProps> = ({
   renderItem,
 }) => (
   <PlanifyBackground>
-    <AppHeader title="Notas!" />
+    <AppHeader
+      title='Notas'
+      subtitle='Suas ideias em um só lugar.'
+      rightAction={
+        <IconButton
+          variant='square'
+          onPress={onCreateNote}
+          accessibilityLabel='Nova nota'
+        >
+          <Plus size={19} color={colors.text} />
+        </IconButton>
+      }
+    />
     {isLoading && notes.length === 0 ? (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.buttonSolid} />
+        <ActivityIndicator size='large' color={colors.buttonSolid} />
       </View>
     ) : (
       <FlatList
@@ -41,7 +53,13 @@ const NotasView: React.FC<NotasViewProps> = ({
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.notesContainer}
-        ListEmptyComponent={EmptyNotes}
+        ListEmptyComponent={
+          <EmptyState
+            icon={<FilePlus size={20} color={colors.textSecondary} />}
+            title='Sem notas'
+            subtitle='Toque no + para criar uma nova nota.'
+          />
+        }
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -52,49 +70,15 @@ const NotasView: React.FC<NotasViewProps> = ({
         }
       />
     )}
-    <TouchableOpacity
-      style={styles.addButton}
-      onPress={onCreateNote}
-      activeOpacity={0.85}
-    >
-      <View style={styles.addButtonInner}>
-        <Plus color={colors.white} size={28} />
-      </View>
-    </TouchableOpacity>
   </PlanifyBackground>
 );
 
 const styles = StyleSheet.create({
-  notesContainer: { flexGrow: 1, padding: 20, paddingBottom: 40 },
+  notesContainer: { flexGrow: 1, padding: 20, paddingBottom: 130 },
   loading: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  addButton: {
-    position: 'absolute',
-    right: 28,
-    bottom: 36,
-    borderRadius: 32,
-    width: 64,
-    height: 64,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  addButtonInner: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.buttonSolid,
-    borderWidth: 1.5,
-    borderColor: colors.buttonBorder,
   },
 });
 

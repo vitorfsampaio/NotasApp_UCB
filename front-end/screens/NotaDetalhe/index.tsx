@@ -96,7 +96,7 @@ const NotaDetalheScreen: React.FC = () => {
 
   const handleBackPress = useCallback(async () => {
     await saveNote();
-    router.replace('/');
+    router.back();
   }, [router, saveNote]);
 
   const handleContentChange = useCallback(
@@ -111,7 +111,7 @@ const NotaDetalheScreen: React.FC = () => {
     const runDelete = async () => {
       try {
         await deleteNote(id as string);
-        router.replace('/');
+        router.back();
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Erro ao excluir a nota.';
@@ -150,7 +150,7 @@ const NotaDetalheScreen: React.FC = () => {
         title: title.trim() || 'Nota sem título',
         content: content.trim(),
       });
-      router.replace('/');
+      router.back();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Erro ao criar a nota.';

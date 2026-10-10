@@ -1,5 +1,6 @@
 import { getApiBaseUrl } from '@/constants/config';
-import type { AuthSession, AuthUser } from '@/types';
+import { isMainFocus, isUsageType } from '@/constants/userPreferences';
+import type { AuthSession, AuthUser, MainFocus, UsageType } from '@/types';
 
 interface ApiAuthPayload {
   codigo: number;
@@ -10,6 +11,8 @@ interface ApiAuthPayload {
     username: string;
     fullName?: string;
     onboardingCompleted?: boolean;
+    usageType?: string | null;
+    mainFocus?: string | null;
   };
 }
 
@@ -19,6 +22,8 @@ function mapUsuario(raw: NonNullable<ApiAuthPayload['usuario']>): AuthUser {
     username: raw.username,
     fullName: raw.fullName ?? '',
     onboardingCompleted: Boolean(raw.onboardingCompleted),
+    usageType: isUsageType(raw.usageType) ? raw.usageType : null,
+    mainFocus: isMainFocus(raw.mainFocus) ? raw.mainFocus : null,
   };
 }
 
@@ -33,7 +38,7 @@ async function parseAuthResponse(response: Response): Promise<ApiAuthPayload> {
 
 export async function loginRequest(
   username: string,
-  password: string
+  password: string,
 ): Promise<AuthSession> {
   const base = getApiBaseUrl();
   const response = await fetch(`${base}/api/auth/login`, {
@@ -51,13 +56,21 @@ export async function loginRequest(
 export async function registerRequest(
   username: string,
   password: string,
-  fullName: string
+  fullName: string,
+  usageType: UsageType,
+  mainFocus: MainFocus,
 ): Promise<AuthSession> {
   const base = getApiBaseUrl();
   const response = await fetch(`${base}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password, fullName }),
+    body: JSON.stringify({
+      username,
+      password,
+      fullName,
+      usageType,
+      mainFocus,
+    }),
   });
   const data = await parseAuthResponse(response);
   if (!response.ok || !data.token || !data.usuario) {

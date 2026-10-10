@@ -1,51 +1,58 @@
 import React, { memo } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ImageBackground, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PlanifyBackground from '@/components/PlanifyBackground';
-import { colors, fonts, radii, shadows } from '@/constants/theme';
+import HandwrittenNote from '@/components/HandwrittenNote';
+import PrimaryButton from '@/components/PrimaryButton';
+import { colors, fonts } from '@/constants/theme';
 
 interface OnboardingViewProps {
   onStart: () => void;
   loading?: boolean;
 }
 
+const highlights = ['Tarefas do dia', 'Agenda e lembretes', 'Projetos e notas'];
+
 const OnboardingView: React.FC<OnboardingViewProps> = ({
   onStart,
   loading = false,
 }) => (
-  <PlanifyBackground>
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
+  <PlanifyBackground showLeaves>
+    <SafeAreaView
+      style={styles.safe}
+      edges={['top', 'bottom', 'left', 'right']}
+    >
       <View style={styles.content}>
-        <View style={styles.heroCard}>
-          <Image
-            source={require('../../assets/images/planify-welcome.png')}
-            style={styles.illustration}
-            resizeMode="contain"
-          />
-        </View>
-        <Text style={styles.title}>O Planify resolve pra você!</Text>
-        <Text style={styles.subtitle}>
-          Afinal, ninguém te conhece melhor que a gente.
-        </Text>
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={onStart}
-          activeOpacity={0.88}
-          disabled={loading}
+        <HandwrittenNote
+          lines={['Pequenos passos', 'Grandes resultados']}
+          accent='arrow'
+        />
+        <ImageBackground
+          source={require('../../assets/images/week-mountains.jpg')}
+          style={styles.hero}
+          imageStyle={styles.heroImage}
         >
-          {loading ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <Text style={styles.buttonText}>Começar</Text>
-          )}
-        </TouchableOpacity>
+          <View style={styles.heroOverlay} />
+          <Text style={styles.heroBrand}>Planify</Text>
+          <Text style={styles.heroText}>Planeje hoje. Construa amanhã.</Text>
+        </ImageBackground>
+        <View>
+          <Text style={styles.title}>
+            O Planify organiza{'\n'}o seu dia pra você
+          </Text>
+          <Text style={styles.subtitle}>
+            Construa o que você ama. Um passo de cada vez.
+          </Text>
+          <View style={styles.highlights}>
+            {highlights.map((item) => (
+              <View key={item} style={styles.highlight}>
+                <View style={styles.highlightDot} />
+                <Text style={styles.highlightText}>{item}</Text>
+              </View>
+            ))}
+          </View>
+          <PrimaryButton label='Começar' onPress={onStart} loading={loading} />
+        </View>
       </View>
     </SafeAreaView>
   </PlanifyBackground>
@@ -55,59 +62,77 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   content: {
     flex: 1,
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 28,
+  },
+  hero: {
+    height: 260,
     justifyContent: 'flex-end',
-    paddingHorizontal: 28,
-    paddingBottom: 48,
+    padding: 20,
+    marginVertical: 20,
+    borderRadius: 24,
+    overflow: 'hidden',
   },
-  heroCard: {
-    width: '100%',
-    borderRadius: radii.card,
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.5)',
-    paddingVertical: 12,
-    marginBottom: 24,
-    ...shadows.soft,
+  heroImage: {
+    borderRadius: 24,
   },
-  illustration: {
-    width: '100%',
-    height: 280,
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 24,
+    backgroundColor: 'rgba(20, 24, 21, 0.25)',
+  },
+  heroBrand: {
+    fontSize: 40,
+    fontFamily: fonts.handwrittenBold,
+    color: colors.white,
+  },
+  heroText: {
+    fontSize: 13,
+    fontFamily: fonts.medium,
+    color: colors.white,
   },
   title: {
     fontFamily: fonts.bold,
     fontSize: 28,
+    lineHeight: 34,
     color: colors.text,
-    textAlign: 'center',
-    marginBottom: 12,
+    letterSpacing: -0.6,
   },
   subtitle: {
-    fontFamily: fonts.medium,
-    fontSize: 16,
-    lineHeight: 24,
+    marginTop: 8,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 21,
     color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 36,
-    maxWidth: 320,
   },
-  button: {
-    backgroundColor: colors.button,
-    width: '100%',
-    maxWidth: 280,
-    height: 56,
-    borderRadius: radii.button,
+  highlights: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  highlight: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.buttonBorder,
-    ...shadows.button,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: colors.sage,
   },
-  buttonDisabled: { opacity: 0.7 },
-  buttonText: {
-    fontFamily: fonts.semiBold,
-    fontSize: 18,
-    color: colors.white,
-    letterSpacing: 0.3,
+  highlightDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.sageDot,
+    marginRight: 6,
+  },
+  highlightText: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    color: colors.text,
   },
 });
 

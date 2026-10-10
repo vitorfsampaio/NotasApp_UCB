@@ -8,7 +8,8 @@ import React, {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loginRequest, registerRequest } from '@/utils/authApi';
 import { completeOnboardingRequest } from '@/utils/onboardingApi';
-import type { AuthSession, AuthUser } from '@/types';
+import { isMainFocus, isUsageType } from '@/constants/userPreferences';
+import type { AuthSession, AuthUser, MainFocus, UsageType } from '@/types';
 
 const AUTH_STORAGE_KEY = 'authSession';
 const ONBOARDING_DEVICE_KEY = 'onboardingSeen';
@@ -23,7 +24,9 @@ interface AuthContextValue {
   register: (
     username: string,
     password: string,
-    fullName: string
+    fullName: string,
+    usageType: UsageType,
+    mainFocus: MainFocus,
   ) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   markDeviceOnboardingSeen: () => Promise<void>;
@@ -66,6 +69,8 @@ function normalizeUsuario(user: AuthUser | Record<string, unknown>): AuthUser {
     username: String(user.username),
     fullName: typeof user.fullName === 'string' ? user.fullName : '',
     onboardingCompleted: Boolean(user.onboardingCompleted),
+    usageType: isUsageType(user.usageType) ? user.usageType : null,
+    mainFocus: isMainFocus(user.mainFocus) ? user.mainFocus : null,
   };
 }
 
@@ -127,16 +132,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setSession(next);
       await persist(next);
     },
-    [persist]
+    [persist],
   );
 
   const register = useCallback(
-    async (username: string, password: string, fullName: string) => {
-      const next = await registerRequest(username, password, fullName);
+    async (
+      username: string,
+      password: string,
+      fullName: string,
+      usageType: UsageType,
+      mainFocus: MainFocus,
+    ) => {
+      const next = await registerRequest(
+        username,
+        password,
+        fullName,
+        usageType,
+        mainFocus,
+      );
       setSession(next);
       await persist(next);
     },
-    [persist]
+    [persist],
   );
 
   const completeOnboarding = useCallback(async () => {
@@ -183,10 +200,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       completeOnboarding,
       markDeviceOnboardingSeen,
       logout,
-    ]
+    ],
   );
 
-  return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

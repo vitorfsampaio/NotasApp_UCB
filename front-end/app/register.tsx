@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Redirect, useRouter } from 'expo-router';
 import RegisterView from '@/screens/Register/view';
 import { useAuth } from '@/hooks/useAuth';
+import type { MainFocus, UsageType } from '@/types';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -11,6 +12,8 @@ export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [usageType, setUsageType] = useState<UsageType | null>(null);
+  const [mainFocus, setMainFocus] = useState<MainFocus | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,12 +27,28 @@ export default function RegisterScreen() {
       setError('As senhas não coincidem.');
       return;
     }
+    if (!usageType) {
+      setError('Escolha para que você vai usar o Planify.');
+      return;
+    }
+    if (!mainFocus) {
+      setError('Escolha o que quer organizar primeiro.');
+      return;
+    }
     setLoading(true);
     try {
-      await register(username.trim(), password, fullName.trim());
+      await register(
+        username.trim(),
+        password,
+        fullName.trim(),
+        usageType,
+        mainFocus,
+      );
       try {
         await completeOnboarding();
+        console.log('Onboarding completo');
       } catch {
+        console.log('Erro ao completar onboarding:', e);
       }
       router.replace('/');
     } catch (e: unknown) {
@@ -42,6 +61,8 @@ export default function RegisterScreen() {
     username,
     password,
     confirmPassword,
+    usageType,
+    mainFocus,
     register,
     completeOnboarding,
     router,
@@ -51,10 +72,10 @@ export default function RegisterScreen() {
     return null;
   }
   if (token && onboardingCompleted) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href='/(tabs)' />;
   }
   if (token && !onboardingCompleted) {
-    return <Redirect href="/onboarding" />;
+    return <Redirect href='/onboarding' />;
   }
 
   return (
@@ -63,10 +84,14 @@ export default function RegisterScreen() {
       username={username}
       password={password}
       confirmPassword={confirmPassword}
+      usageType={usageType}
+      mainFocus={mainFocus}
       onFullNameChange={setFullName}
       onUsernameChange={setUsername}
       onPasswordChange={setPassword}
       onConfirmPasswordChange={setConfirmPassword}
+      onUsageTypeChange={setUsageType}
+      onMainFocusChange={setMainFocus}
       onSubmit={handleSubmit}
       onGoLogin={() => router.push('/login')}
       loading={loading}

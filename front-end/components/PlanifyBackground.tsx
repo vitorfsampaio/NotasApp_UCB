@@ -1,19 +1,21 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
+import LeafDecoration from '@/components/LeafDecoration';
 import { colors } from '@/constants/theme';
 
 interface PlanifyBackgroundProps {
   children: React.ReactNode;
   style?: ViewStyle;
+  showLeaves?: boolean;
 }
 
 const PlanifyBackground: React.FC<PlanifyBackgroundProps> = ({
   children,
   style,
+  showLeaves = false,
 }) => (
   <View style={[styles.root, style]}>
-    <View style={styles.ellipseLarge} />
-    <View style={styles.ellipseSmall} />
+    {showLeaves ? <LeafDecoration style={styles.leaves} /> : null}
     {children}
   </View>
 );
@@ -24,23 +26,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     overflow: 'hidden',
   },
-  ellipseLarge: {
+  leaves: {
     position: 'absolute',
-    width: 280,
-    height: 240,
-    borderRadius: 140,
-    backgroundColor: colors.ellipse,
-    top: -40,
-    left: -120,
-  },
-  ellipseSmall: {
-    position: 'absolute',
-    width: 260,
-    height: 240,
-    borderRadius: 130,
-    backgroundColor: colors.ellipse,
-    top: -110,
-    left: 20,
+    left: -18,
+    bottom: 40,
   },
 });
 

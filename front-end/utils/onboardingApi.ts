@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/constants/config';
+import { isMainFocus, isUsageType } from '@/constants/userPreferences';
 import type { AuthUser } from '@/types';
 
 interface OnboardingPayload {
@@ -10,6 +11,8 @@ interface OnboardingPayload {
     username: string;
     fullName?: string;
     onboardingCompleted?: boolean;
+    usageType?: string | null;
+    mainFocus?: string | null;
   };
 }
 
@@ -38,7 +41,7 @@ export async function fetchOnboardingStatus(token: string): Promise<boolean> {
 }
 
 export async function completeOnboardingRequest(
-  token: string
+  token: string,
 ): Promise<AuthUser> {
   const base = getApiBaseUrl();
   const response = await fetch(`${base}/api/onboarding/complete`, {
@@ -57,5 +60,11 @@ export async function completeOnboardingRequest(
     username: data.usuario.username,
     fullName: data.usuario.fullName ?? '',
     onboardingCompleted: Boolean(data.usuario.onboardingCompleted),
+    usageType: isUsageType(data.usuario.usageType)
+      ? data.usuario.usageType
+      : null,
+    mainFocus: isMainFocus(data.usuario.mainFocus)
+      ? data.usuario.mainFocus
+      : null,
   };
 }
