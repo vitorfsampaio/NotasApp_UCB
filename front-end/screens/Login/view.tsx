@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -11,7 +11,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
+import PlanifyBackground from '@/components/PlanifyBackground';
+import { colors, fonts, radii, shadows } from '@/constants/theme';
 
 interface LoginViewProps {
   username: string;
@@ -34,13 +35,8 @@ const LoginView: React.FC<LoginViewProps> = ({
   loading,
   errorMessage,
 }) => (
-  <LinearGradient
-    colors={['#f8fafc', '#e0e7ef']}
-    style={styles.background}
-    start={{ x: 0, y: 0 }}
-    end={{ x: 1, y: 1 }}
-  >
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+  <PlanifyBackground>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.flex}
@@ -48,138 +44,155 @@ const LoginView: React.FC<LoginViewProps> = ({
         <ScrollView
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.title}>Entrar</Text>
-          <Text style={styles.subtitle}>
-            Insira seu usuário e senha para acessar suas notas.
-          </Text>
+          <View style={styles.header}>
+            <Text style={styles.title}>Bem-vindo de volta!</Text>
+            <Text style={styles.subtitle}>
+              Entre para continuar suas anotações.
+            </Text>
+          </View>
+
           <View style={styles.card}>
-            <Text style={styles.label}>Usuário</Text>
             <TextInput
               testID="e2e_login_username"
               style={styles.input}
               value={username}
               onChangeText={onUsernameChange}
-              placeholder="Seu usuário"
-              placeholderTextColor="#9E9E9E"
-              selectionColor="#0074D9"
+              placeholder="Nome de usuário"
+              placeholderTextColor={colors.textMuted}
+              selectionColor={colors.buttonSolid}
               autoCapitalize="none"
               autoCorrect={false}
               editable={!loading}
             />
-            <Text style={styles.label}>Senha</Text>
             <TextInput
               testID="e2e_login_password"
               style={styles.input}
               value={password}
               onChangeText={onPasswordChange}
-              placeholder="Sua senha"
-              placeholderTextColor="#9E9E9E"
-              selectionColor="#0074D9"
+              placeholder="Insira sua senha"
+              placeholderTextColor={colors.textMuted}
+              selectionColor={colors.buttonSolid}
               secureTextEntry
               editable={!loading}
             />
             {errorMessage ? (
               <Text style={styles.error}>{errorMessage}</Text>
             ) : null}
+
             <TouchableOpacity
               testID="e2e_login_submit"
-              style={[styles.primaryOuter, loading && styles.primaryDisabled]}
+              style={[styles.button, loading && styles.buttonDisabled]}
               onPress={onSubmit}
               disabled={loading}
-              activeOpacity={0.85}
+              activeOpacity={0.88}
             >
-              <LinearGradient
-                colors={['#0074D9', '#00C6FB']}
-                style={styles.primaryGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.primaryText}>Entrar</Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.secondary}
-              onPress={onGoRegister}
-              disabled={loading}
-              hitSlop={{ top: 12, bottom: 12 }}
-            >
-              <Text style={styles.secondaryText}>Criar conta</Text>
+              {loading ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <Text style={styles.buttonText}>Entrar</Text>
+              )}
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={styles.linkWrap}
+            onPress={onGoRegister}
+            disabled={loading}
+            hitSlop={{ top: 12, bottom: 12 }}
+          >
+            <Text style={styles.link}>Criar conta</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  </LinearGradient>
+  </PlanifyBackground>
 );
 
 const styles = StyleSheet.create({
-  background: { flex: 1 },
-  safeArea: { flex: 1 },
+  safe: { flex: 1 },
   flex: { flex: 1 },
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 48,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: 'Inter-Bold',
-    color: '#0074D9',
-    marginBottom: 8,
-  },
-  subtitle: { fontSize: 15, color: '#666', marginBottom: 28 },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#0074D9',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  label: {
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#DEDEDE',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 16,
-    backgroundColor: '#F9FAFB',
-  },
-  error: { color: '#FF4136', fontSize: 14, marginBottom: 12 },
-  primaryOuter: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginTop: 4,
-  },
-  primaryDisabled: { opacity: 0.7 },
-  primaryGradient: {
-    paddingVertical: 14,
-    alignItems: 'center',
+    paddingTop: 56,
+    paddingBottom: 36,
     justifyContent: 'center',
   },
-  primaryText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontFamily: 'Inter-Bold',
+  header: {
+    marginBottom: 28,
+    paddingHorizontal: 8,
   },
-  secondary: { marginTop: 20, alignItems: 'center' },
-  secondaryText: { color: '#0074D9', fontSize: 16, fontFamily: 'Inter-Medium' },
+  title: {
+    fontFamily: fonts.bold,
+    fontSize: 30,
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontFamily: fonts.medium,
+    fontSize: 16,
+    lineHeight: 24,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.28)',
+    borderRadius: radii.card,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.55)',
+    gap: 14,
+    ...shadows.soft,
+  },
+  input: {
+    backgroundColor: colors.input,
+    height: 56,
+    borderRadius: radii.input,
+    paddingHorizontal: 22,
+    fontSize: 16,
+    fontFamily: fonts.medium,
+    color: colors.text,
+    borderWidth: 1.5,
+    borderColor: colors.inputBorder,
+    ...shadows.soft,
+  },
+  error: {
+    color: colors.error,
+    fontSize: 14,
+    fontFamily: fonts.medium,
+    textAlign: 'center',
+  },
+  button: {
+    marginTop: 8,
+    backgroundColor: colors.button,
+    height: 56,
+    borderRadius: radii.button,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.buttonBorder,
+    ...shadows.button,
+  },
+  buttonDisabled: { opacity: 0.7 },
+  buttonText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 18,
+    color: colors.white,
+    letterSpacing: 0.3,
+  },
+  linkWrap: {
+    marginTop: 28,
+    alignItems: 'center',
+  },
+  link: {
+    fontFamily: fonts.semiBold,
+    fontSize: 16,
+    color: colors.text,
+    textDecorationLine: 'underline',
+  },
 });
 
-export default LoginView;
+export default memo(LoginView);

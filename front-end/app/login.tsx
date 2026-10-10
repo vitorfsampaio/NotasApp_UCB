@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, token, isReady } = useAuth();
+  const { login, token, isReady, onboardingCompleted } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(username.trim(), password);
-      router.replace('/(tabs)');
+      router.replace('/');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro ao entrar');
     } finally {
@@ -27,8 +27,11 @@ export default function LoginScreen() {
   if (!isReady) {
     return null;
   }
-  if (token) {
+  if (token && onboardingCompleted) {
     return <Redirect href="/(tabs)" />;
+  }
+  if (token && !onboardingCompleted) {
+    return <Redirect href="/onboarding" />;
   }
 
   return (

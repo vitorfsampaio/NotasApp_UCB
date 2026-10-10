@@ -8,7 +8,7 @@ export default function NotaLayout() {
     return null;
   }
   if (!token) {
-    return <Redirect href="/login" />;
+    return <Redirect href="/onboarding" />;
   }
   return <Slot />;
 }

@@ -9,6 +9,7 @@ import {
 import { useSecurity } from '../hooks/useSecurity';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, fonts } from '@/constants/theme';
 
 interface AppHeaderProps {
   title: string;
@@ -35,7 +36,7 @@ export default function AppHeader({ title }: AppHeaderProps) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <View style={styles.container}>
         <TouchableOpacity
           testID="e2e_sos_header"
@@ -54,16 +55,14 @@ export default function AppHeader({ title }: AppHeaderProps) {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   container: {
     height: 56,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
+    paddingHorizontal: 20,
+    backgroundColor: colors.background,
   },
   titleContainer: {
     flex: 1,
@@ -71,8 +70,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 22,
-    fontFamily: 'Inter-Bold',
-    color: '#333333',
+    fontSize: 28,
+    fontFamily: fonts.bold,
+    color: colors.text,
+    textDecorationLine: 'underline',
   },
 });

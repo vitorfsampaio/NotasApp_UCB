@@ -12,8 +12,15 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   Inter_400Regular,
   Inter_500Medium,
-  Inter_700Bold
+  Inter_700Bold,
 } from '@expo-google-fonts/inter';
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
+import { colors } from '@/constants/theme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,6 +31,10 @@ export default function RootLayout() {
     'Inter-Regular': Inter_400Regular,
     'Inter-Medium': Inter_500Medium,
     'Inter-Bold': Inter_700Bold,
+    'Poppins-Regular': Poppins_400Regular,
+    'Poppins-Medium': Poppins_500Medium,
+    'Poppins-SemiBold': Poppins_600SemiBold,
+    'Poppins-Bold': Poppins_700Bold,
   });
 
   useEffect(() => {
@@ -43,7 +54,7 @@ export default function RootLayout() {
           <SecurityProvider>
             <NotesProvider>
               <Stack screenOptions={{ headerShown: false }} />
-              <StatusBar style="auto" />
+              <StatusBar style="dark" backgroundColor={colors.background} />
             </NotesProvider>
           </SecurityProvider>
         </AuthProvider>

@@ -3,41 +3,36 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Note } from '../types';
 import { getRelativeTime } from '../utils/dateUtils';
+import { colors, fonts } from '@/constants/theme';
 
 interface NoteItemProps {
   note: Note;
   index?: number;
 }
 
-const pastelColors = [
-  '#E3F0FF', // azul claro
-  '#FFF6E3', // amarelo claro
-  '#E3FFF3', // verde claro
-  '#F3E3FF', // lilás claro
-  '#FFE3E3', // rosa claro
-];
-
-export default function NoteItem({ note, index = 0 }: NoteItemProps) {
+export default function NoteItem({ note }: NoteItemProps) {
   const router = useRouter();
 
   const handlePress = useCallback(() => {
     router.push(`/nota/${note.id}`);
   }, [router, note.id]);
 
-  const colorIndex = index % pastelColors.length;
-  const cardColor = pastelColors[colorIndex];
-  const barColor = ['#0074D9', '#FFB300', '#00C6A2', '#A259FF', '#FF6B81'][colorIndex];
-
   return (
-    <TouchableOpacity 
-      style={[styles.container, { backgroundColor: cardColor }]}
+    <TouchableOpacity
+      style={styles.container}
       onPress={handlePress}
       activeOpacity={0.85}
     >
-      <View style={[styles.colorBar, { backgroundColor: barColor }]} />
-      <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={1}>{note.title}</Text>
-        <Text style={styles.preview} numberOfLines={2}>{note.content}</Text>
+      <View style={styles.top}>
+        <Text style={styles.title} numberOfLines={1}>
+          {note.title}
+        </Text>
+        <Text style={styles.preview} numberOfLines={4}>
+          {note.content}
+        </Text>
+      </View>
+      <View style={styles.footer}>
+        <View style={styles.accentBar} />
         <Text style={styles.date}>{getRelativeTime(note.updatedAt)}</Text>
       </View>
     </TouchableOpacity>
@@ -46,39 +41,49 @@ export default function NoteItem({ note, index = 0 }: NoteItemProps) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    borderRadius: 18,
+    borderRadius: 7,
     marginBottom: 18,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
     shadowRadius: 4,
-    alignItems: 'stretch',
   },
-  colorBar: {
-    width: 6,
-    borderTopLeftRadius: 18,
-    borderBottomLeftRadius: 18,
-  },
-  content: {
-    flex: 1,
-    padding: 18,
+  top: {
+    backgroundColor: colors.backgroundSoft,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 20,
+    minHeight: 140,
   },
   title: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 6,
+    fontSize: 20,
+    fontFamily: fonts.semiBold,
+    color: colors.text,
+    marginBottom: 10,
   },
   preview: {
-    fontSize: 14,
-    color: '#555',
-    lineHeight: 20,
+    fontSize: 15,
+    fontFamily: fonts.regular,
+    color: colors.textSecondary,
+    lineHeight: 22,
+  },
+  footer: {
+    backgroundColor: colors.card,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  accentBar: {
+    width: 88,
+    height: 10,
+    borderRadius: 4,
+    backgroundColor: colors.cardAccent,
     marginBottom: 10,
   },
   date: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: 13,
+    fontFamily: fonts.medium,
+    color: colors.tabInactive,
   },
 });

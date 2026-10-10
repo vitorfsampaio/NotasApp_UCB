@@ -1,5 +1,5 @@
 import { getApiBaseUrl } from '@/constants/config';
-import type { AuthSession } from '@/types';
+import type { AuthSession, AuthUser } from '@/types';
 
 interface ApiAuthPayload {
   codigo: number;
@@ -8,6 +8,17 @@ interface ApiAuthPayload {
   usuario?: {
     id: number;
     username: string;
+    fullName?: string;
+    onboardingCompleted?: boolean;
+  };
+}
+
+function mapUsuario(raw: NonNullable<ApiAuthPayload['usuario']>): AuthUser {
+  return {
+    id: raw.id,
+    username: raw.username,
+    fullName: raw.fullName ?? '',
+    onboardingCompleted: Boolean(raw.onboardingCompleted),
   };
 }
 
@@ -20,7 +31,10 @@ async function parseAuthResponse(response: Response): Promise<ApiAuthPayload> {
   }
 }
 
-export async function loginRequest(username: string, password: string): Promise<AuthSession> {
+export async function loginRequest(
+  username: string,
+  password: string
+): Promise<AuthSession> {
   const base = getApiBaseUrl();
   const response = await fetch(`${base}/api/auth/login`, {
     method: 'POST',
@@ -31,19 +45,23 @@ export async function loginRequest(username: string, password: string): Promise<
   if (!response.ok || !data.token || !data.usuario) {
     throw new Error(data.mensagem || 'Não foi possível entrar.');
   }
-  return { token: data.token, usuario: data.usuario };
+  return { token: data.token, usuario: mapUsuario(data.usuario) };
 }
 
-export async function registerRequest(username: string, password: string): Promise<AuthSession> {
+export async function registerRequest(
+  username: string,
+  password: string,
+  fullName: string
+): Promise<AuthSession> {
   const base = getApiBaseUrl();
   const response = await fetch(`${base}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, fullName }),
   });
   const data = await parseAuthResponse(response);
   if (!response.ok || !data.token || !data.usuario) {
     throw new Error(data.mensagem || 'Não foi possível criar a conta.');
   }
-  return { token: data.token, usuario: data.usuario };
+  return { token: data.token, usuario: mapUsuario(data.usuario) };
 }

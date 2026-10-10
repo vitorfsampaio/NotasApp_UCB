@@ -9,7 +9,7 @@ const SobreScreen: React.FC = () => {
 
   const handleLogout = useCallback(async () => {
     await logout();
-    router.replace('/login');
+    router.replace('/onboarding');
   }, [logout, router]);
 
   return <SobreView onLogout={handleLogout} />;

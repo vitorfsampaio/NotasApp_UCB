@@ -20,6 +20,8 @@ export interface SecurityContact {
 export interface AuthUser {
   id: number;
   username: string;
+  fullName: string;
+  onboardingCompleted: boolean;
 }
 
 export interface AuthSession {

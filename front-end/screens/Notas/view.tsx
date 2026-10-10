@@ -1,54 +1,76 @@
 import React from 'react';
-import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import AppHeader from '@/components/AppHeader';
-import NoteItem from '@/components/NoteItem';
 import EmptyNotes from '@/components/EmptyNotes';
 import { Plus } from 'lucide-react-native';
 import { Note } from './model';
-import { LinearGradient } from 'expo-linear-gradient';
+import PlanifyBackground from '@/components/PlanifyBackground';
+import { colors } from '@/constants/theme';
 
 interface NotasViewProps {
   notes: Note[];
+  isLoading: boolean;
+  onRefresh: () => void;
   onCreateNote: () => void;
   renderItem: ({ item }: { item: Note }) => JSX.Element;
 }
 
-const NotasView: React.FC<NotasViewProps> = ({ notes, onCreateNote, renderItem }) => (
-  <LinearGradient
-    colors={["#f8fafc", "#e0e7ef"]}
-    style={styles.background}
-    start={{ x: 0, y: 0 }}
-    end={{ x: 1, y: 1 }}
-  >
-    <AppHeader title="Notas" />
-    <FlatList
-      data={notes}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.notesContainer}
-      ListEmptyComponent={EmptyNotes}
-      showsVerticalScrollIndicator={false}
-    />
-    <TouchableOpacity 
+const NotasView: React.FC<NotasViewProps> = ({
+  notes,
+  isLoading,
+  onRefresh,
+  onCreateNote,
+  renderItem,
+}) => (
+  <PlanifyBackground>
+    <AppHeader title="Notas!" />
+    {isLoading && notes.length === 0 ? (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color={colors.buttonSolid} />
+      </View>
+    ) : (
+      <FlatList
+        data={notes}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.notesContainer}
+        ListEmptyComponent={EmptyNotes}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={onRefresh}
+            tintColor={colors.buttonSolid}
+          />
+        }
+      />
+    )}
+    <TouchableOpacity
       style={styles.addButton}
       onPress={onCreateNote}
       activeOpacity={0.85}
     >
-      <LinearGradient
-        colors={["#0074D9", "#00C6FB"]}
-        style={styles.addButtonGradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <Plus color="#FFFFFF" size={28} />
-      </LinearGradient>
+      <View style={styles.addButtonInner}>
+        <Plus color={colors.white} size={28} />
+      </View>
     </TouchableOpacity>
-  </LinearGradient>
+  </PlanifyBackground>
 );
 
 const styles = StyleSheet.create({
-  background: { flex: 1 },
   notesContainer: { flexGrow: 1, padding: 20, paddingBottom: 40 },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   addButton: {
     position: 'absolute',
     right: 28,
@@ -59,18 +81,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,
-    shadowColor: '#0074D9',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
-  addButtonGradient: {
+  addButtonInner: {
     width: 64,
     height: 64,
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.buttonSolid,
+    borderWidth: 1.5,
+    borderColor: colors.buttonBorder,
   },
 });
 
-export default NotasView; 
+export default NotasView;

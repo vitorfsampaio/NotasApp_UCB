@@ -1,13 +1,13 @@
-import os
-import sqlite3
-
 from flask import Blueprint, jsonify, request
 from http import HTTPStatus
+from psycopg.errors import UniqueViolation
 
 from auth_service import (
   create_access_token,
   create_user,
   get_user_by_username,
+  jwt_secret,
+  serialize_user,
   validate_password,
   validate_username,
   verify_password,
@@ -17,17 +17,15 @@ from util import resposta_api
 bp = Blueprint('auth', __name__)
 
 
-def _jwt_secret() -> str:
-  return os.environ.get('JWT_SECRET', 'dev-secret-change-in-production')
-
-
 @bp.route('/register', methods=['POST'])
 def register():
   data = request.get_json(silent=True) or {}
   username_raw = data.get('username')
   password_raw = data.get('password')
+  full_name_raw = data.get('fullName')
   username = username_raw.strip() if isinstance(username_raw, str) else ''
   password = password_raw if isinstance(password_raw, str) else ''
+  full_name = full_name_raw.strip() if isinstance(full_name_raw, str) else ''
 
   if not username or not password:
     code = HTTPStatus.BAD_REQUEST
@@ -51,19 +49,24 @@ def register():
     return jsonify(resposta_api(code, "Este nome de usuário já está em uso.")), code
 
   try:
-    user_id = create_user(username, password)
-  except sqlite3.IntegrityError:
+    user_id = create_user(username, password, full_name)
+  except UniqueViolation:
     code = HTTPStatus.CONFLICT
     return jsonify(resposta_api(code, "Este nome de usuário já está em uso.")), code
 
-  token = create_access_token(user_id, username, _jwt_secret())
+  token = create_access_token(user_id, username, jwt_secret())
   code = HTTPStatus.CREATED
   return (
     jsonify(
       {
         **resposta_api(code, "Conta criada com sucesso."),
         'token': token,
-        'usuario': {'id': user_id, 'username': username},
+        'usuario': {
+          'id': user_id,
+          'username': username,
+          'fullName': full_name,
+          'onboardingCompleted': False,
+        },
       }
     ),
     code,
@@ -87,14 +90,14 @@ def login():
     code = HTTPStatus.UNAUTHORIZED
     return jsonify(resposta_api(code, "Usuário ou senha incorretos.")), code
 
-  token = create_access_token(user['id'], user['username'], _jwt_secret())
+  token = create_access_token(user['id'], user['username'], jwt_secret())
   code = HTTPStatus.OK
   return (
     jsonify(
       {
         **resposta_api(code, "Login realizado com sucesso."),
         'token': token,
-        'usuario': {'id': user['id'], 'username': user['username']},
+        'usuario': serialize_user(user),
       }
     ),
     code,

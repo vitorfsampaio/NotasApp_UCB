@@ -47,7 +47,10 @@
             "useFrameworks": "static"
           },
           "android": {
-            "enableHermes": true
+            "enableHermes": true,
+            "extraMavenRepos": [
+              "../../node_modules/expo-camera/android/maven"
+            ]
           }
         }
       ],

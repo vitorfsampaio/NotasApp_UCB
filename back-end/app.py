@@ -9,12 +9,16 @@ from http import HTTPStatus
 import twilio_service
 
 from auth_blueprint import bp as auth_bp
+from notes_blueprint import bp as notes_bp
+from onboarding_blueprint import bp as onboarding_bp
 from database import init_db
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 init_db()
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(notes_bp, url_prefix='/api/notes')
+app.register_blueprint(onboarding_bp, url_prefix='/api/onboarding')
 
 @app.route('/api/ligacao-emergencia', methods=['POST'])
 def ligacao_emergencia():

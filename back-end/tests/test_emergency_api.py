@@ -5,8 +5,10 @@ os.environ.setdefault('ACCOUNT_SID', 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 os.environ.setdefault('AUTH_TOKEN', 'test_auth_token')
 os.environ.setdefault('TWILIO_NUMBER', '+15555555555')
 os.environ.setdefault('MY_NUMBER', '+15555555555')
+os.environ.setdefault('DATABASE_URL', 'postgresql://test:test@localhost:5432/test')
 
-from app import app
+with patch('database.init_db'):
+    from app import app
 
 
 def test_tc05_valid_coords_two_contacts_mock_returns_201():
