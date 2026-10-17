@@ -37,8 +37,8 @@ interface InicioViewProps {
   todayTasks: Task[];
   isLoading: boolean;
   onRefresh: () => void;
-  onNamePress: () => void;
-  onNameLongPress: () => void;
+  onSecretPress: () => void;
+  onSecretLongPress: () => void;
   onBellPress: () => void;
   onAvatarPress: () => void;
   onWeekCardPress: () => void;
@@ -58,8 +58,8 @@ const InicioView: React.FC<InicioViewProps> = ({
   todayTasks,
   isLoading,
   onRefresh,
-  onNamePress,
-  onNameLongPress,
+  onSecretPress,
+  onSecretLongPress,
   onBellPress,
   onAvatarPress,
   onWeekCardPress,
@@ -88,10 +88,19 @@ const InicioView: React.FC<InicioViewProps> = ({
           }
         >
           <View style={styles.topBar}>
-            <HandwrittenNote
-              lines={['Pequenos passos', 'Grandes resultados']}
-              accent='arrow'
-            />
+            <TouchableOpacity
+              testID='e2e_sos_header'
+              onPress={onSecretPress}
+              onLongPress={onSecretLongPress}
+              delayLongPress={650}
+              activeOpacity={1}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <HandwrittenNote
+                lines={['Pequenos passos', 'Grandes resultados']}
+                accent='arrow'
+              />
+            </TouchableOpacity>
             <View style={styles.topActions}>
               <IconButton
                 variant='plain'
@@ -108,17 +117,9 @@ const InicioView: React.FC<InicioViewProps> = ({
           </View>
 
           <Text style={styles.greeting}>{greeting}</Text>
-          <TouchableOpacity
-            testID='e2e_sos_header'
-            onPress={onNamePress}
-            onLongPress={onNameLongPress}
-            delayLongPress={650}
-            activeOpacity={1}
-          >
-            <Text style={styles.name} numberOfLines={1}>
-              {firstName} 👋
-            </Text>
-          </TouchableOpacity>
+          <Text style={styles.name} numberOfLines={1}>
+            {firstName} 👋
+          </Text>
           <Text style={styles.tagline}>
             Construa o que você ama. Um passo de cada vez.
           </Text>

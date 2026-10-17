@@ -62,11 +62,11 @@ const InicioScreen: React.FC = () => {
     void refreshPlanner();
   }, [refreshPlanner]);
 
-  const handleNamePress = useCallback(() => {
+  const handleSecretPress = useCallback(() => {
     void onHeaderSecretTap();
   }, [onHeaderSecretTap]);
 
-  const handleNameLongPress = useCallback(() => {
+  const handleSecretLongPress = useCallback(() => {
     authenticateForSecurityAccess().then((success) => {
       if (success) {
         router.push('/seguranca');
@@ -108,8 +108,8 @@ const InicioScreen: React.FC = () => {
       todayTasks={todayTasks}
       isLoading={isLoading}
       onRefresh={handleRefresh}
-      onNamePress={handleNamePress}
-      onNameLongPress={handleNameLongPress}
+      onSecretPress={handleSecretPress}
+      onSecretLongPress={handleSecretLongPress}
       onBellPress={goToAgenda}
       onAvatarPress={goToProfile}
       onWeekCardPress={goToAgenda}
