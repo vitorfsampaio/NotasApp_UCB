@@ -9,7 +9,7 @@ import {
   PenTool,
   ScanSearch,
 } from 'lucide-react-native';
-import type { EventIcon } from '@/types';
+import type { EventIcon } from '@/domain/models';
 
 export const eventIcons: Record<EventIcon, LucideIcon> = {
   calendar: CalendarDays,

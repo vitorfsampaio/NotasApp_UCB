@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useFrameworkReady } from '../hooks/useFrameworkReady';
+import { useFrameworkReady } from '@/application/hooks/useFrameworkReady';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AuthProvider } from '@/context/AuthContext';
-import { NotesProvider } from '@/context/NotesContext';
-import { PlannerProvider } from '@/context/PlannerContext';
-import { SecurityProvider } from '@/context/SecurityContext';
+import { AuthProvider } from '@/application/providers/AuthContext';
+import { NotesProvider } from '@/application/providers/NotesContext';
+import { PlannerProvider } from '@/application/providers/PlannerContext';
+import { SecurityProvider } from '@/application/providers/SecurityContext';
 import { useFonts } from 'expo-font';
 import { SplashScreen } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';

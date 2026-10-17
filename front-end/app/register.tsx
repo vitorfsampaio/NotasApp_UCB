@@ -46,9 +46,7 @@ export default function RegisterScreen() {
       );
       try {
         await completeOnboarding();
-        console.log('Onboarding completo');
       } catch {
-        console.log('Erro ao completar onboarding:', e);
       }
       router.replace('/');
     } catch (e: unknown) {

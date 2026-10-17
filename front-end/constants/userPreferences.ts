@@ -1,4 +1,4 @@
-import type { MainFocus, UsageType } from '@/types';
+import type { MainFocus, UsageType } from '@/domain/models';
 
 export const usageTypeLabels: Record<UsageType, string> = {
   personal: 'Pessoal',

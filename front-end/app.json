@@ -68,7 +68,7 @@
     },
     "jsEngine": "hermes",
     "extra": {
-      "apiBaseUrl": "http://192.168.1.8:5000"
+      "apiBaseUrl": "http://10.65.28.127:5000"
     }
   }
 }

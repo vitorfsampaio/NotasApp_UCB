@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16
+    container_name: planify-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: planify
+      POSTGRES_PASSWORD: planify
+      POSTGRES_DB: notas_app
+    ports:
+      - '5432:5432'
+    volumes:
+      - planify_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U planify -d notas_app']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    container_name: planify-backend
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    env_file:
+      - path: ./back-end/.env
+        required: false
+    environment:
+      DATABASE_URL: postgresql://planify:planify@db:5432/notas_app
+      JWT_SECRET: ${JWT_SECRET:-planify-local-dev-secret}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./back-end:/app
+
+volumes:
+  planify_pg_data:

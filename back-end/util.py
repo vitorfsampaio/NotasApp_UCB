@@ -1,58 +1,17 @@
-from __future__ import annotations
+from domain.validators import (
+  coordenadas_validas,
+  criar_link_maps,
+  parse_iso_datetime,
+  telefone_valido,
+  verificar_campos,
+)
+from presentation.http.responses import resposta_api
 
-from datetime import datetime, timezone
-from http import HTTPStatus
-import re
-
-def resposta_api(codigo:HTTPStatus, mensagem:str) -> dict[str, str | int]:
-    return {
-        "codigo": codigo,
-        "mensagem": mensagem,
-    }
-
-def coordenadas_validas(lat, lon, gps_indisponivel=False):
-    try:
-        lat = float(lat)
-        lon = float(lon)
-    except (TypeError, ValueError):
-        return False
-    if not (-90 <= lat <= 90 and -180 <= lon <= 180):
-        return False
-    if gps_indisponivel:
-        return True
-    if lat == 0 and lon == 0:
-        return False
-    return True
-
-
-def telefone_valido(numero):
-    if numero is None or isinstance(numero, int):
-        return False
-    padrao = re.compile(r'^\+\d{11,15}$')
-    return padrao.match(str(numero)) is not None
-
-def criar_link_maps(latitude, longitude):
-    return f"https://www.google.com/maps?q={latitude},{longitude}"
-
-def parse_iso_datetime(value) -> datetime | None:
-    if not isinstance(value, str) or not value.strip():
-        return None
-    raw = value.strip()
-    if raw.endswith('Z'):
-        raw = raw[:-1] + '+00:00'
-    try:
-        parsed = datetime.fromisoformat(raw)
-    except ValueError:
-        return None
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
-    return parsed
-
-def verificar_campos(numero, latitude, longitude, nome):
-    if numero is None or (isinstance(numero, str) and str(numero).strip() == ''):
-        return "numero"
-    if nome is None or (isinstance(nome, str) and str(nome).strip() == ''):
-        return "nome"
-    if latitude is None or longitude is None:
-        return "latitude"
-    return None
+__all__ = [
+  'coordenadas_validas',
+  'criar_link_maps',
+  'parse_iso_datetime',
+  'resposta_api',
+  'telefone_valido',
+  'verificar_campos',
+]
