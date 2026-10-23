@@ -43,6 +43,12 @@ def init_db() -> None:
       )
       cur.execute(
         """
+        ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS subscription_plan TEXT NOT NULL DEFAULT ''
+        """
+      )
+      cur.execute(
+        """
         CREATE TABLE IF NOT EXISTS notes (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -121,6 +127,56 @@ def init_db() -> None:
         ON projects (user_id, updated_at DESC)
         """
       )
+      cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS emergency_tickets (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          nome TEXT NOT NULL,
+          telefone TEXT NOT NULL DEFAULT '',
+          prioridade TEXT NOT NULL DEFAULT 'ALTA',
+          status TEXT NOT NULL DEFAULT 'NOVO',
+          responsavel TEXT,
+          latitude DOUBLE PRECISION,
+          longitude DOUBLE PRECISION,
+          cidade TEXT NOT NULL DEFAULT '',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """
+      )
+      cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_emergency_tickets_status_created
+        ON emergency_tickets (status, created_at DESC)
+        """
+      )
+      cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS emergency_attendances (
+          id SERIAL PRIMARY KEY,
+          ticket_id INTEGER NOT NULL REFERENCES emergency_tickets(id) ON DELETE CASCADE,
+          nome TEXT NOT NULL,
+          responsavel TEXT NOT NULL,
+          started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          ended_at TIMESTAMPTZ,
+          status TEXT NOT NULL DEFAULT 'EM_ANDAMENTO',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """
+      )
+      cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_emergency_attendances_ticket
+        ON emergency_attendances (ticket_id, started_at DESC)
+        """
+      )
     conn.commit()
   finally:
     conn.close()
+
+  from infrastructure.database.seed_admin import seed_admin_user
+  from infrastructure.database.seed_emergency import seed_emergency_data
+
+  seed_admin_user()
+  seed_emergency_data()

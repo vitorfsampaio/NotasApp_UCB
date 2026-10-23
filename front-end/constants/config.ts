@@ -63,6 +63,10 @@ function collectDevHosts(): string[] {
 }
 
 export function getApiBaseUrl(): string {
+  if (Platform.OS === 'android' && Constants.isDevice === false) {
+    return 'http://10.0.2.2:5000';
+  }
+
   const extra = Constants.expoConfig?.extra as ExpoExtra | undefined;
   const fromExtra = extra?.apiBaseUrl?.trim();
   if (fromExtra) {

@@ -6,6 +6,7 @@ export default function Index() {
     token,
     isReady,
     onboardingCompleted,
+    hasSelectedPlan,
     deviceOnboardingSeen,
   } = useAuth();
 
@@ -16,6 +17,9 @@ export default function Index() {
   if (token) {
     if (!onboardingCompleted) {
       return <Redirect href="/onboarding" />;
+    }
+    if (!hasSelectedPlan) {
+      return <Redirect href="/plans" />;
     }
     return <Redirect href="/(tabs)" />;
   }

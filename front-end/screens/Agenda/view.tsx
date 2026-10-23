@@ -35,6 +35,7 @@ interface AgendaViewProps {
   onCloseMonthPicker: () => void;
   onSelectMonth: (year: number, month: number) => void;
   onSelectDate: (date: Date) => void;
+  onVisibleMonthChange: (year: number, month: number) => void;
   onEventPress: (id: string) => void;
   onCreateEvent: () => void;
 }
@@ -55,6 +56,7 @@ const AgendaView: React.FC<AgendaViewProps> = ({
   onCloseMonthPicker,
   onSelectMonth,
   onSelectDate,
+  onVisibleMonthChange,
   onEventPress,
   onCreateEvent,
 }) => (
@@ -73,17 +75,8 @@ const AgendaView: React.FC<AgendaViewProps> = ({
         </IconButton>
       }
     />
-    <ScrollView
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={isLoading}
-          onRefresh={onRefresh}
-          tintColor={colors.buttonSolid}
-        />
-      }
-    >
+
+    <View style={styles.calendarBlock}>
       <View style={styles.monthRow}>
         <TouchableOpacity
           style={styles.monthButton}
@@ -100,8 +93,23 @@ const AgendaView: React.FC<AgendaViewProps> = ({
         selectedDate={selectedDate}
         markedDates={markedDates}
         onSelectDate={onSelectDate}
+        onVisibleMonthChange={onVisibleMonthChange}
       />
+    </View>
 
+    <ScrollView
+      style={styles.flex}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      nestedScrollEnabled
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoading}
+          onRefresh={onRefresh}
+          tintColor={colors.buttonSolid}
+        />
+      }
+    >
       <View style={styles.timeline}>
         {dayEvents.length === 0 ? (
           <View>
@@ -141,9 +149,14 @@ const AgendaView: React.FC<AgendaViewProps> = ({
 );
 
 const styles = StyleSheet.create({
-  content: {
+  flex: { flex: 1 },
+  calendarBlock: {
     paddingHorizontal: 20,
     paddingTop: 12,
+    paddingBottom: 8,
+  },
+  content: {
+    paddingHorizontal: 20,
     paddingBottom: 130,
   },
   monthRow: {
@@ -164,10 +177,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   timeline: {
-    marginTop: 22,
-    paddingTop: 18,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.inputBorder,
+    paddingTop: 10,
   },
   addButton: {
     marginTop: 14,

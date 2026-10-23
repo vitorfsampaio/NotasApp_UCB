@@ -10,6 +10,10 @@ const AgendaScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(() =>
     startOfDay(new Date())
   );
+  const [visibleMonth, setVisibleMonth] = useState(() => {
+    const today = new Date();
+    return { year: today.getFullYear(), month: today.getMonth() };
+  });
   const [now, setNow] = useState(() => new Date());
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
 
@@ -47,7 +51,7 @@ const AgendaScreen: React.FC = () => {
     return upcoming?.id ?? null;
   }, [dayEvents, now, selectedDate, ongoingEventId]);
 
-  const monthLabel = `${MONTH_NAMES[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+  const monthLabel = `${MONTH_NAMES[visibleMonth.month]} ${visibleMonth.year}`;
 
   const handleRefresh = useCallback(() => {
     void refreshPlanner();
@@ -56,7 +60,12 @@ const AgendaScreen: React.FC = () => {
   const handleBack = useCallback(() => router.navigate('/'), [router]);
 
   const handleGoToToday = useCallback(() => {
-    setSelectedDate(startOfDay(new Date()));
+    const today = startOfDay(new Date());
+    setSelectedDate(today);
+    setVisibleMonth({
+      year: today.getFullYear(),
+      month: today.getMonth(),
+    });
   }, []);
 
   const openMonthPicker = useCallback(() => setIsMonthPickerVisible(true), []);
@@ -69,11 +78,32 @@ const AgendaScreen: React.FC = () => {
     const today = new Date();
     const isCurrentMonth =
       today.getFullYear() === year && today.getMonth() === month;
-    setSelectedDate(
-      startOfDay(isCurrentMonth ? today : new Date(year, month, 1))
-    );
+    const next = startOfDay(isCurrentMonth ? today : new Date(year, month, 1));
+    setSelectedDate(next);
+    setVisibleMonth({ year, month });
     setIsMonthPickerVisible(false);
   }, []);
+
+  const handleSelectDate = useCallback((date: Date) => {
+    const next = startOfDay(date);
+    setSelectedDate(next);
+    setVisibleMonth({
+      year: next.getFullYear(),
+      month: next.getMonth(),
+    });
+  }, []);
+
+  const handleVisibleMonthChange = useCallback(
+    (year: number, month: number) => {
+      setVisibleMonth((prev) => {
+        if (prev.year === year && prev.month === month) {
+          return prev;
+        }
+        return { year, month };
+      });
+    },
+    []
+  );
 
   const handleEventPress = useCallback(
     (id: string) => router.push(`/evento/${id}`),
@@ -103,7 +133,8 @@ const AgendaScreen: React.FC = () => {
       onOpenMonthPicker={openMonthPicker}
       onCloseMonthPicker={closeMonthPicker}
       onSelectMonth={handleSelectMonth}
-      onSelectDate={setSelectedDate}
+      onSelectDate={handleSelectDate}
+      onVisibleMonthChange={handleVisibleMonthChange}
       onEventPress={handleEventPress}
       onCreateEvent={handleCreateEvent}
     />

@@ -76,9 +76,40 @@ const InicioView: React.FC<InicioViewProps> = ({
   return (
     <PlanifyBackground>
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            testID='e2e_sos_header'
+            onPress={onSecretPress}
+            onLongPress={onSecretLongPress}
+            delayLongPress={400}
+            activeOpacity={0.7}
+            hitSlop={{ top: 16, bottom: 16, left: 12, right: 12 }}
+            style={styles.secretHitArea}
+          >
+            <HandwrittenNote
+              lines={['Pequenos passos', 'Grandes resultados']}
+              accent='arrow'
+            />
+          </TouchableOpacity>
+          <View style={styles.topActions}>
+            <IconButton
+              variant='plain'
+              onPress={onBellPress}
+              accessibilityLabel='Lembretes'
+            >
+              <Bell size={22} color={colors.text} strokeWidth={1.8} />
+              {hasPendingReminder ? <View style={styles.bellDot} /> : null}
+            </IconButton>
+            <TouchableOpacity onPress={onAvatarPress} activeOpacity={0.85}>
+              <Avatar name={fullName} size={38} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
+          nestedScrollEnabled
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
@@ -87,35 +118,6 @@ const InicioView: React.FC<InicioViewProps> = ({
             />
           }
         >
-          <View style={styles.topBar}>
-            <TouchableOpacity
-              testID='e2e_sos_header'
-              onPress={onSecretPress}
-              onLongPress={onSecretLongPress}
-              delayLongPress={650}
-              activeOpacity={1}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <HandwrittenNote
-                lines={['Pequenos passos', 'Grandes resultados']}
-                accent='arrow'
-              />
-            </TouchableOpacity>
-            <View style={styles.topActions}>
-              <IconButton
-                variant='plain'
-                onPress={onBellPress}
-                accessibilityLabel='Lembretes'
-              >
-                <Bell size={22} color={colors.text} strokeWidth={1.8} />
-                {hasPendingReminder ? <View style={styles.bellDot} /> : null}
-              </IconButton>
-              <TouchableOpacity onPress={onAvatarPress} activeOpacity={0.85}>
-                <Avatar name={fullName} size={38} />
-              </TouchableOpacity>
-            </View>
-          </View>
-
           <Text style={styles.greeting}>{greeting}</Text>
           <Text style={styles.name} numberOfLines={1}>
             {firstName} 👋
@@ -230,7 +232,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: 22,
+    paddingHorizontal: 22,
+    paddingTop: 8,
+    marginBottom: 14,
+  },
+  secretHitArea: {
+    minWidth: 160,
+    minHeight: 52,
+    justifyContent: 'center',
+    paddingVertical: 4,
+    paddingRight: 8,
   },
   topActions: {
     flexDirection: 'row',

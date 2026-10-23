@@ -86,6 +86,8 @@ export type UsageType = 'personal' | 'professional' | 'studies' | 'family';
 
 export type MainFocus = 'tasks' | 'schedule' | 'projects' | 'notes';
 
+export type SubscriptionPlan = 'free' | 'pro' | 'max';
+
 export interface AuthUser {
   id: number;
   username: string;
@@ -93,6 +95,7 @@ export interface AuthUser {
   onboardingCompleted: boolean;
   usageType: UsageType | null;
   mainFocus: MainFocus | null;
+  plan: SubscriptionPlan | null;
 }
 
 export interface AuthSession {

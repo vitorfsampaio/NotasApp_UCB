@@ -10,6 +10,7 @@ export default function OnboardingScreen() {
     token,
     isReady,
     onboardingCompleted,
+    hasSelectedPlan,
     deviceOnboardingSeen,
     completeOnboarding,
     markDeviceOnboardingSeen,
@@ -21,7 +22,7 @@ export default function OnboardingScreen() {
       setLoading(true);
       try {
         await completeOnboarding();
-        router.replace('/(tabs)');
+        router.replace('/plans');
       } catch (e: unknown) {
         const message =
           e instanceof Error ? e.message : 'Erro ao concluir onboarding.';
@@ -44,8 +45,11 @@ export default function OnboardingScreen() {
     return null;
   }
 
-  if (token && onboardingCompleted) {
+  if (token && onboardingCompleted && hasSelectedPlan) {
     return <Redirect href="/(tabs)" />;
+  }
+  if (token && onboardingCompleted && !hasSelectedPlan) {
+    return <Redirect href="/plans" />;
   }
 
   if (!token && deviceOnboardingSeen) {

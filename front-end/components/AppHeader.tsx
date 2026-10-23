@@ -27,17 +27,25 @@ export default function AppHeader({
   const router = useRouter();
   const { authenticateForSecurityAccess, onHeaderSecretTap } = useSecurity();
 
-  const handleTitlePress = useCallback(() => {
-    void onHeaderSecretTap();
-  }, [onHeaderSecretTap]);
-
-  const handleTitleLongPress = useCallback(() => {
+  const openSecretMenu = useCallback(() => {
     authenticateForSecurityAccess().then((success) => {
       if (success) {
         router.push('/seguranca');
       }
     });
   }, [authenticateForSecurityAccess, router]);
+
+  const handleTitlePress = useCallback(() => {
+    void onHeaderSecretTap().then((result) => {
+      if (result === 'menu') {
+        openSecretMenu();
+      }
+    });
+  }, [onHeaderSecretTap, openSecretMenu]);
+
+  const handleTitleLongPress = useCallback(() => {
+    openSecretMenu();
+  }, [openSecretMenu]);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

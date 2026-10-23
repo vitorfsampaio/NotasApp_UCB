@@ -6,8 +6,14 @@ import type { MainFocus, UsageType } from '@/types';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { register, token, isReady, onboardingCompleted, completeOnboarding } =
-    useAuth();
+  const {
+    register,
+    token,
+    isReady,
+    onboardingCompleted,
+    hasSelectedPlan,
+    completeOnboarding,
+  } = useAuth();
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -69,8 +75,11 @@ export default function RegisterScreen() {
   if (!isReady) {
     return null;
   }
-  if (token && onboardingCompleted) {
+  if (token && onboardingCompleted && hasSelectedPlan) {
     return <Redirect href='/(tabs)' />;
+  }
+  if (token && onboardingCompleted && !hasSelectedPlan) {
+    return <Redirect href='/plans' />;
   }
   if (token && !onboardingCompleted) {
     return <Redirect href='/onboarding' />;

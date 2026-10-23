@@ -4,7 +4,7 @@ import PlanifyTabBar from '@/components/PlanifyTabBar';
 import { colors } from '@/constants/theme';
 
 export default function TabLayout() {
-  const { token, isReady, onboardingCompleted } = useAuth();
+  const { token, isReady, onboardingCompleted, hasSelectedPlan } = useAuth();
 
   if (!isReady) {
     return null;
@@ -14,6 +14,9 @@ export default function TabLayout() {
   }
   if (!onboardingCompleted) {
     return <Redirect href='/onboarding' />;
+  }
+  if (!hasSelectedPlan) {
+    return <Redirect href='/plans' />;
   }
 
   return (

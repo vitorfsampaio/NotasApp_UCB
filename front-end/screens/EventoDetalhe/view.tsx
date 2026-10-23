@@ -150,11 +150,14 @@ const EventoDetalheView: React.FC<EventoDetalheViewProps> = ({
             onSelect={onDurationChange}
           />
           <ChipSelector
-            label='Lembrete'
+            label='Lembrete extra'
             options={reminderOptions}
             selected={reminderMinutes}
             onSelect={onReminderChange}
           />
+          <Text style={styles.reminderHint}>
+            Todo evento já avisa 1 dia antes e no dia, na barra de notificações.
+          </Text>
           <ChipSelector
             label='Ícone'
             options={iconOptions}
@@ -209,6 +212,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.medium,
     marginBottom: 12,
+  },
+  reminderHint: {
+    marginTop: -4,
+    marginBottom: 14,
+    fontSize: 12,
+    lineHeight: 18,
+    fontFamily: fonts.regular,
+    color: colors.textMuted,
   },
   saveButton: {
     marginTop: 8,

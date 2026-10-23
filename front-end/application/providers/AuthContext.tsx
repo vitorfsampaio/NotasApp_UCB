@@ -7,9 +7,19 @@ import React, {
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loginRequest, registerRequest } from '@/data/api/authApi';
-import { completeOnboardingRequest } from '@/data/api/onboardingApi';
+import {
+  completeOnboardingRequest,
+  selectPlanRequest,
+} from '@/data/api/onboardingApi';
 import { isMainFocus, isUsageType } from '@/constants/userPreferences';
-import type { AuthSession, AuthUser, MainFocus, UsageType } from '@/domain/models';
+import { isSubscriptionPlan } from '@/constants/plans';
+import type {
+  AuthSession,
+  AuthUser,
+  MainFocus,
+  SubscriptionPlan,
+  UsageType,
+} from '@/domain/models';
 
 const AUTH_STORAGE_KEY = 'authSession';
 const ONBOARDING_DEVICE_KEY = 'onboardingSeen';
@@ -19,6 +29,7 @@ interface AuthContextValue {
   usuario: AuthUser | null;
   isReady: boolean;
   onboardingCompleted: boolean;
+  hasSelectedPlan: boolean;
   deviceOnboardingSeen: boolean;
   login: (username: string, password: string) => Promise<void>;
   register: (
@@ -26,9 +37,10 @@ interface AuthContextValue {
     password: string,
     fullName: string,
     usageType: UsageType,
-    mainFocus: MainFocus,
+    mainFocus: MainFocus
   ) => Promise<void>;
   completeOnboarding: () => Promise<void>;
+  selectPlan: (plan: SubscriptionPlan) => Promise<void>;
   markDeviceOnboardingSeen: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -38,10 +50,12 @@ export const AuthContext = createContext<AuthContextValue>({
   usuario: null,
   isReady: false,
   onboardingCompleted: false,
+  hasSelectedPlan: false,
   deviceOnboardingSeen: false,
   login: async () => {},
   register: async () => {},
   completeOnboarding: async () => {},
+  selectPlan: async () => {},
   markDeviceOnboardingSeen: async () => {},
   logout: async () => {},
 });
@@ -71,6 +85,7 @@ function normalizeUsuario(user: AuthUser | Record<string, unknown>): AuthUser {
     onboardingCompleted: Boolean(user.onboardingCompleted),
     usageType: isUsageType(user.usageType) ? user.usageType : null,
     mainFocus: isMainFocus(user.mainFocus) ? user.mainFocus : null,
+    plan: isSubscriptionPlan(user.plan) ? user.plan : null,
   };
 }
 
@@ -132,7 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setSession(next);
       await persist(next);
     },
-    [persist],
+    [persist]
   );
 
   const register = useCallback(
@@ -141,19 +156,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       password: string,
       fullName: string,
       usageType: UsageType,
-      mainFocus: MainFocus,
+      mainFocus: MainFocus
     ) => {
       const next = await registerRequest(
         username,
         password,
         fullName,
         usageType,
-        mainFocus,
+        mainFocus
       );
       setSession(next);
       await persist(next);
     },
-    [persist],
+    [persist]
   );
 
   const completeOnboarding = useCallback(async () => {
@@ -167,6 +182,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await AsyncStorage.setItem(ONBOARDING_DEVICE_KEY, '1');
     setDeviceOnboardingSeen(true);
   }, [session, persist]);
+
+  const selectPlan = useCallback(
+    async (plan: SubscriptionPlan) => {
+      if (!session?.token) {
+        throw new Error('Faça login para escolher um plano.');
+      }
+      const usuario = await selectPlanRequest(session.token, plan);
+      const next: AuthSession = { token: session.token, usuario };
+      setSession(next);
+      await persist(next);
+    },
+    [session, persist]
+  );
 
   const markDeviceOnboardingSeen = useCallback(async () => {
     await AsyncStorage.setItem(ONBOARDING_DEVICE_KEY, '1');
@@ -184,10 +212,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       usuario: session?.usuario ?? null,
       isReady,
       onboardingCompleted: Boolean(session?.usuario?.onboardingCompleted),
+      hasSelectedPlan: Boolean(session?.usuario?.plan),
       deviceOnboardingSeen,
       login,
       register,
       completeOnboarding,
+      selectPlan,
       markDeviceOnboardingSeen,
       logout,
     }),
@@ -198,9 +228,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       login,
       register,
       completeOnboarding,
+      selectPlan,
       markDeviceOnboardingSeen,
       logout,
-    ],
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -31,7 +31,11 @@
       "package": "com.notasapp",
       "permissions": [
         "USE_BIOMETRIC",
-        "USE_FINGERPRINT"
+        "USE_FINGERPRINT",
+        "POST_NOTIFICATIONS",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "SCHEDULE_EXACT_ALARM"
       ]
     },
     "web": {
@@ -68,7 +72,7 @@
     },
     "jsEngine": "hermes",
     "extra": {
-      "apiBaseUrl": "http://10.65.28.127:5000"
+      "apiBaseUrl": "http://10.65.128.144:5000"
     }
   }
 }

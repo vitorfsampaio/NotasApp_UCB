@@ -58,19 +58,23 @@ def register():
     return jsonify(resposta_api(code, "Este nome de usuário já está em uso.")), code
 
   token = auth_app.issue_token(user_id, username)
+  user = auth_app.get_user_by_id(user_id)
   code = HTTPStatus.CREATED
   return (
     jsonify(
       {
         **resposta_api(code, "Conta criada com sucesso."),
         'token': token,
-        'usuario': {
+        'usuario': auth_app.serialize_user(user)
+        if user
+        else {
           'id': user_id,
           'username': username,
           'fullName': full_name,
           'onboardingCompleted': False,
           'usageType': usage_type,
           'mainFocus': main_focus,
+          'plan': None,
         },
       }
     ),

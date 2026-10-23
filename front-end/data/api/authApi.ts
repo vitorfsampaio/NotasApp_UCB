@@ -1,4 +1,5 @@
 import { isMainFocus, isUsageType } from '@/constants/userPreferences';
+import { isSubscriptionPlan } from '@/constants/plans';
 import type { AuthSession, AuthUser, MainFocus, UsageType } from '@/domain/models';
 import {
   getBaseUrl,
@@ -17,6 +18,7 @@ interface ApiAuthPayload {
     onboardingCompleted?: boolean;
     usageType?: string | null;
     mainFocus?: string | null;
+    plan?: string | null;
   };
 }
 
@@ -28,6 +30,7 @@ function mapUsuario(raw: NonNullable<ApiAuthPayload['usuario']>): AuthUser {
     onboardingCompleted: Boolean(raw.onboardingCompleted),
     usageType: isUsageType(raw.usageType) ? raw.usageType : null,
     mainFocus: isMainFocus(raw.mainFocus) ? raw.mainFocus : null,
+    plan: isSubscriptionPlan(raw.plan) ? raw.plan : null,
   };
 }
 

@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlanner } from '@/hooks/usePlanner';
+import { planLabels } from '@/constants/plans';
 import { mainFocusLabels, usageTypeLabels } from '@/constants/userPreferences';
 import PerfilView from './view';
 import type { ProfileStat } from './model';
@@ -25,6 +26,9 @@ const PerfilScreen: React.FC = () => {
 
   const preferences = useMemo(() => {
     const items: string[] = [];
+    if (usuario?.plan) {
+      items.push(`Plano ${planLabels[usuario.plan]}`);
+    }
     if (usuario?.usageType) {
       items.push(usageTypeLabels[usuario.usageType]);
     }
@@ -32,7 +36,7 @@ const PerfilScreen: React.FC = () => {
       items.push(`Foco: ${mainFocusLabels[usuario.mainFocus]}`);
     }
     return items;
-  }, [usuario?.usageType, usuario?.mainFocus]);
+  }, [usuario?.plan, usuario?.usageType, usuario?.mainFocus]);
 
   const handleLogout = useCallback(async () => {
     await logout();

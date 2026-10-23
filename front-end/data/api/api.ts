@@ -1,4 +1,4 @@
-import { getBaseUrl } from '@/data/http/client';
+import { authHeaders, getBaseUrl, jsonHeaders } from '@/data/http/client';
 
 export async function enviarLigacaoEmergencia({
   numero,
@@ -6,18 +6,20 @@ export async function enviarLigacaoEmergencia({
   longitude,
   nome,
   gps_indisponivel,
+  token,
 }: {
   numero: string;
   latitude: number;
   longitude: number;
   nome: string;
   gps_indisponivel?: boolean;
+  token?: string | null;
 }) {
   try {
     const base = getBaseUrl();
     const response = await fetch(`${base}/api/ligacao-emergencia`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: token ? authHeaders(token) : jsonHeaders(),
       body: JSON.stringify({
         numero,
         latitude,

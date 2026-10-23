@@ -18,6 +18,7 @@ def serialize_user(user: UserRecord) -> dict:
     'onboardingCompleted': user['onboarding_completed'],
     'usageType': user['usage_type'] or None,
     'mainFocus': user['main_focus'] or None,
+    'plan': user['subscription_plan'] or None,
   }
 
 
@@ -65,3 +66,7 @@ def get_onboarding_status(user_id: int) -> bool | None:
 
 def complete_onboarding(user_id: int) -> UserRecord | None:
   return users_repository.complete_onboarding(user_id)
+
+
+def select_subscription_plan(user_id: int, plan: str) -> UserRecord | None:
+  return users_repository.update_subscription_plan(user_id, plan)

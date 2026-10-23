@@ -8,7 +8,8 @@ from domain.models import UserRecord
 from infrastructure.database.connection import get_connection
 
 USER_COLUMNS = (
-  'id, username, password_hash, full_name, onboarding_completed, usage_type, main_focus'
+  'id, username, password_hash, full_name, onboarding_completed, '
+  'usage_type, main_focus, subscription_plan'
 )
 
 
@@ -21,6 +22,7 @@ def row_to_user(row: dict) -> UserRecord:
     'onboarding_completed': bool(row['onboarding_completed']),
     'usage_type': row['usage_type'] or '',
     'main_focus': row['main_focus'] or '',
+    'subscription_plan': row['subscription_plan'] or '',
   }
 
 
@@ -108,6 +110,28 @@ def complete_onboarding(user_id: int) -> UserRecord | None:
         RETURNING {USER_COLUMNS}
         """,
         (user_id,),
+      )
+      row = cur.fetchone()
+    conn.commit()
+    if row is None:
+      return None
+    return row_to_user(row)
+  finally:
+    conn.close()
+
+
+def update_subscription_plan(user_id: int, plan: str) -> UserRecord | None:
+  conn = get_connection()
+  try:
+    with conn.cursor() as cur:
+      cur.execute(
+        f"""
+        UPDATE users
+        SET subscription_plan = %s
+        WHERE id = %s
+        RETURNING {USER_COLUMNS}
+        """,
+        (plan, user_id),
       )
       row = cur.fetchone()
     conn.commit()

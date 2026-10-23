@@ -13,9 +13,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isE2eBuild } from '@/constants/e2e';
 import { enviarLigacaoEmergencia } from '@/data/api/api';
 import {
+  evaluateSecretMenuFromTaps,
   evaluateSosModeFromTaps,
   trimOldTaps,
+  type SecretGestureResult,
 } from '@/data/sosTapEngine';
+import { useAuth } from '@/application/hooks/useAuth';
 
 interface SecurityContextProps {
   safetyKeyword: string;
@@ -30,7 +33,7 @@ interface SecurityContextProps {
   saveSecuritySettings: () => Promise<void>;
   authenticateForSecurityAccess: () => Promise<boolean>;
   checkForKeyword: (text: string) => void;
-  onHeaderSecretTap: () => Promise<void>;
+  onHeaderSecretTap: () => Promise<SecretGestureResult>;
 }
 
 export const SecurityContext = createContext<SecurityContextProps>({
@@ -46,7 +49,7 @@ export const SecurityContext = createContext<SecurityContextProps>({
   saveSecuritySettings: async () => {},
   authenticateForSecurityAccess: async () => false,
   checkForKeyword: () => {},
-  onHeaderSecretTap: async () => {},
+  onHeaderSecretTap: async () => 'none',
 });
 
 interface SecurityProviderProps {
@@ -72,6 +75,7 @@ const storage = {
 export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   children,
 }) => {
+  const { token, usuario } = useAuth();
   const [safetyKeyword, setSafetyKeyword] = useState('');
   const [contacts, setContacts] = useState<SecurityContact[]>([]);
   const [sendLocationEnabled, setSendLocationEnabled] = useState(true);
@@ -85,6 +89,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   );
   const [e2eEmergencySucceeded, setE2eEmergencySucceeded] = useState(false);
   const secretTapTimestampsRef = useRef<number[]>([]);
+  const menuDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const loadSecuritySettings = async () => {
@@ -185,7 +190,10 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
         let latitude: number | null = null;
         let longitude: number | null = null;
         let gpsIndisponivel = false;
-        const nome = contacts[0]?.name || 'Usuário';
+        const nome =
+          usuario?.fullName?.trim() ||
+          usuario?.username?.trim() ||
+          'Usuário Planify';
 
         if (sendLocationEnabled) {
           try {
@@ -247,6 +255,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
           longitude: longitude ?? 0,
           nome,
           gps_indisponivel: gpsIndisponivel,
+          token,
         });
 
         if (isE2eBuild()) {
@@ -271,6 +280,8 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
       sendLocationEnabled,
       lastKnownLatitude,
       lastKnownLongitude,
+      token,
+      usuario,
     ]
   );
 
@@ -285,7 +296,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     [safetyKeyword, runEmergencyProtocol]
   );
 
-  const onHeaderSecretTap = useCallback(async () => {
+  const onHeaderSecretTap = useCallback(async (): Promise<SecretGestureResult> => {
     const now = Date.now();
     secretTapTimestampsRef.current = trimOldTaps(
       [...secretTapTimestampsRef.current, now],
@@ -293,9 +304,35 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     );
     const mode = evaluateSosModeFromTaps(secretTapTimestampsRef.current, now);
     if (mode === 'active') {
+      if (menuDebounceRef.current) {
+        clearTimeout(menuDebounceRef.current);
+        menuDebounceRef.current = null;
+      }
       secretTapTimestampsRef.current = [];
       await runEmergencyProtocol(true);
+      return 'sos';
     }
+
+    return await new Promise<SecretGestureResult>((resolve) => {
+      if (menuDebounceRef.current) {
+        clearTimeout(menuDebounceRef.current);
+      }
+      menuDebounceRef.current = setTimeout(() => {
+        menuDebounceRef.current = null;
+        const taps = secretTapTimestampsRef.current;
+        const checkAt = Date.now();
+        if (evaluateSosModeFromTaps(taps, checkAt) === 'active') {
+          resolve('none');
+          return;
+        }
+        if (evaluateSecretMenuFromTaps(taps, checkAt)) {
+          secretTapTimestampsRef.current = [];
+          resolve('menu');
+          return;
+        }
+        resolve('none');
+      }, 550);
+    });
   }, [runEmergencyProtocol]);
 
   useEffect(() => {

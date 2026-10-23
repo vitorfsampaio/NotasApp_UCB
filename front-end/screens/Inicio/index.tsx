@@ -62,17 +62,25 @@ const InicioScreen: React.FC = () => {
     void refreshPlanner();
   }, [refreshPlanner]);
 
-  const handleSecretPress = useCallback(() => {
-    void onHeaderSecretTap();
-  }, [onHeaderSecretTap]);
-
-  const handleSecretLongPress = useCallback(() => {
+  const openSecretMenu = useCallback(() => {
     authenticateForSecurityAccess().then((success) => {
       if (success) {
         router.push('/seguranca');
       }
     });
   }, [authenticateForSecurityAccess, router]);
+
+  const handleSecretPress = useCallback(() => {
+    void onHeaderSecretTap().then((result) => {
+      if (result === 'menu') {
+        openSecretMenu();
+      }
+    });
+  }, [onHeaderSecretTap, openSecretMenu]);
+
+  const handleSecretLongPress = useCallback(() => {
+    openSecretMenu();
+  }, [openSecretMenu]);
 
   const goToAgenda = useCallback(() => router.navigate('/agenda'), [router]);
   const goToProfile = useCallback(() => router.navigate('/perfil'), [router]);

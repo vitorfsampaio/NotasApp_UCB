@@ -1,7 +1,9 @@
 const FAST_WINDOW_MS = 2500;
+const MENU_WINDOW_MS = 1800;
 const TAP_HISTORY_MS = 12000;
 
 export type SosActivationState = 'inactive' | 'active';
+export type SecretGestureResult = 'none' | 'sos' | 'menu';
 
 export function trimOldTaps(timestamps: readonly number[], nowMs: number): number[] {
   const cutoff = nowMs - TAP_HISTORY_MS;
@@ -26,4 +28,16 @@ export function evaluateSosModeFromTaps(
     return 'active';
   }
   return 'inactive';
+}
+
+export function evaluateSecretMenuFromTaps(
+  timestamps: readonly number[],
+  nowMs: number
+): boolean {
+  const trimmed = trimOldTaps(timestamps, nowMs);
+  if (trimmed.length < 3) {
+    return false;
+  }
+  const lastThree = trimmed.slice(-3);
+  return lastThree[2] - lastThree[0] <= MENU_WINDOW_MS;
 }

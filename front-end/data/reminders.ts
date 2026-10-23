@@ -4,8 +4,16 @@ import type { PlannerEvent, Task } from '@/domain/models';
 import { formatTime } from './dateUtils';
 
 const REMINDER_CHANNEL_ID = 'planify-reminders';
+const DAY_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
 
 let isConfigured = false;
+
+type ScheduledReminder = {
+  date: Date;
+  title: string;
+  body: string;
+};
 
 async function ensureConfigured(): Promise<boolean> {
   if (Platform.OS === 'web') {
@@ -21,8 +29,10 @@ async function ensureConfigured(): Promise<boolean> {
     });
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync(REMINDER_CHANNEL_ID, {
-        name: 'Lembretes',
+        name: 'Eventos e lembretes',
         importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#2C322E',
       });
     }
     isConfigured = true;
@@ -51,6 +61,52 @@ function describeReminder(minutes: number): string {
   return `Começa em ${Math.round(minutes / 1440)} dia(s)`;
 }
 
+function dayBeforeAtSameTime(startsAt: Date): Date {
+  return new Date(startsAt.getTime() - DAY_MS);
+}
+
+function dayOfApproachingDate(startsAt: Date): Date {
+  const morning = new Date(startsAt);
+  morning.setHours(8, 0, 0, 0);
+  if (startsAt.getTime() <= morning.getTime()) {
+    return new Date(startsAt.getTime() - HOUR_MS);
+  }
+  return morning;
+}
+
+function buildEventReminders(event: PlannerEvent): ScheduledReminder[] {
+  const reminders: ScheduledReminder[] = [
+    {
+      date: dayBeforeAtSameTime(event.startsAt),
+      title: 'Evento amanhã',
+      body: `${event.title} • ${formatTime(event.startsAt)}`,
+    },
+    {
+      date: dayOfApproachingDate(event.startsAt),
+      title: 'Evento próximo',
+      body: `${event.title} está chegando hoje às ${formatTime(event.startsAt)}`,
+    },
+  ];
+
+  if (event.reminderMinutes !== null) {
+    const customDate = new Date(
+      event.startsAt.getTime() - event.reminderMinutes * 60000
+    );
+    const alreadyCovered = reminders.some(
+      (item) => Math.abs(item.date.getTime() - customDate.getTime()) < 60000
+    );
+    if (!alreadyCovered) {
+      reminders.push({
+        date: customDate,
+        title: event.title,
+        body: `${describeReminder(event.reminderMinutes)} • ${formatTime(event.startsAt)}`,
+      });
+    }
+  }
+
+  return reminders;
+}
+
 export async function syncReminders(
   events: PlannerEvent[],
   tasks: Task[]
@@ -63,15 +119,7 @@ export async function syncReminders(
     await Notifications.cancelAllScheduledNotificationsAsync();
     const now = Date.now();
 
-    const eventReminders = events
-      .filter((event) => event.reminderMinutes !== null)
-      .map((event) => ({
-        date: new Date(
-          event.startsAt.getTime() - (event.reminderMinutes ?? 0) * 60000
-        ),
-        title: event.title,
-        body: `${describeReminder(event.reminderMinutes ?? 0)} • ${formatTime(event.startsAt)}`,
-      }));
+    const eventReminders = events.flatMap((event) => buildEventReminders(event));
 
     const taskReminders = tasks
       .filter((task) => !task.completed)
@@ -88,8 +136,15 @@ export async function syncReminders(
     await Promise.all(
       upcoming.map((reminder) =>
         Notifications.scheduleNotificationAsync({
-          content: { title: reminder.title, body: reminder.body },
-          trigger: { date: reminder.date, channelId: REMINDER_CHANNEL_ID },
+          content: {
+            title: reminder.title,
+            body: reminder.body,
+            sound: true,
+          },
+          trigger: {
+            date: reminder.date,
+            channelId: REMINDER_CHANNEL_ID,
+          },
         })
       )
     );
