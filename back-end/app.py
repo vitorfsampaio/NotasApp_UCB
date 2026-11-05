@@ -7,6 +7,7 @@ from flask_cors import CORS
 
 from infrastructure.database.schema import init_db
 from presentation.blueprints.auth import bp as auth_bp
+from presentation.blueprints.cycle import bp as cycle_bp
 from presentation.blueprints.emergency import bp as emergency_bp
 from presentation.blueprints.emergency_monitor import bp as emergency_monitor_bp
 from presentation.blueprints.events import bp as events_bp
@@ -24,6 +25,7 @@ app.register_blueprint(onboarding_bp, url_prefix='/api/onboarding')
 app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
 app.register_blueprint(events_bp, url_prefix='/api/events')
 app.register_blueprint(projects_bp, url_prefix='/api/projects')
+app.register_blueprint(cycle_bp, url_prefix='/api/cycle')
 app.register_blueprint(emergency_bp, url_prefix='/api')
 app.register_blueprint(emergency_monitor_bp, url_prefix='/api/emergency')
 

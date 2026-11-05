@@ -12,12 +12,18 @@ import {
   CalendarPlus,
   ChevronRight,
   FolderKanban,
+  HeartPulse,
   ListTodo,
   StickyNote,
 } from 'lucide-react-native';
 import { colors, fonts } from '@/constants/theme';
 
-export type QuickAddOption = 'task' | 'event' | 'project' | 'note';
+export type QuickAddOption =
+  | 'task'
+  | 'event'
+  | 'project'
+  | 'note'
+  | 'cycle';
 
 interface QuickAddSheetProps {
   visible: boolean;
@@ -26,6 +32,12 @@ interface QuickAddSheetProps {
 }
 
 const options = [
+  {
+    key: 'cycle',
+    label: 'Registro do ciclo',
+    description: 'Humor, sintomas, fluxo ou relação',
+    Icon: HeartPulse,
+  },
   {
     key: 'task',
     label: 'Nova tarefa',

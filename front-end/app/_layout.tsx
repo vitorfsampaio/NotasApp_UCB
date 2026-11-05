@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/application/hooks/useFrameworkReady';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from '@/application/providers/AuthContext';
+import { CycleProvider } from '@/application/providers/CycleContext';
 import { NotesProvider } from '@/application/providers/NotesContext';
 import { PlannerProvider } from '@/application/providers/PlannerContext';
 import { SecurityProvider } from '@/application/providers/SecurityContext';
@@ -60,13 +61,15 @@ export default function RootLayout() {
           <SecurityProvider>
             <NotesProvider>
               <PlannerProvider>
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: colors.background },
-                  }}
-                />
-                <StatusBar style="dark" backgroundColor={colors.background} />
+                <CycleProvider>
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: { backgroundColor: colors.background },
+                    }}
+                  />
+                  <StatusBar style="dark" backgroundColor={colors.background} />
+                </CycleProvider>
               </PlannerProvider>
             </NotesProvider>
           </SecurityProvider>

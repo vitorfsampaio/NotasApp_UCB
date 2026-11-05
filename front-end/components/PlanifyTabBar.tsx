@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import {
   CalendarDays,
+  CircleDot,
   FileText,
   House,
   LucideIcon,
@@ -13,9 +14,11 @@ import {
 } from 'lucide-react-native';
 import QuickAddSheet, { QuickAddOption } from '@/components/QuickAddSheet';
 import { colors, shadows } from '@/constants/theme';
+import { formatIsoDate } from '@/screens/Ciclo/model';
 
 const tabIcons: Record<string, LucideIcon> = {
   index: House,
+  ciclo: CircleDot,
   agenda: CalendarDays,
   notas: FileText,
   perfil: User,
@@ -26,6 +29,7 @@ const quickAddRoutes = {
   event: '/evento/novo',
   project: '/projeto/novo',
   note: '/nota/nova',
+  cycle: '/ciclo/log',
 } as const;
 
 const PlanifyTabBar: React.FC<BottomTabBarProps> = ({
@@ -41,6 +45,13 @@ const PlanifyTabBar: React.FC<BottomTabBarProps> = ({
   const closeSheet = useCallback(() => setIsSheetVisible(false), []);
   const handleQuickAdd = useCallback(
     (option: QuickAddOption) => {
+      if (option === 'cycle') {
+        router.push({
+          pathname: '/ciclo/log',
+          params: { date: formatIsoDate(new Date()) },
+        });
+        return;
+      }
       router.push(quickAddRoutes[option]);
     },
     [router]
@@ -128,7 +139,7 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   tab: {
-    width: 50,
+    width: 44,
     height: 54,
     alignItems: 'center',
     justifyContent: 'center',

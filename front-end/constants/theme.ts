@@ -26,6 +26,18 @@ export const colors = {
   tabInactive: '#8C918B',
   shadow: '#2C322E',
   overlay: 'rgba(30, 35, 32, 0.35)',
+  period: '#C45B5B',
+  periodSoft: '#F3D9D9',
+  periodMuted: '#E8A0A0',
+  fertile: '#5B9A9A',
+  fertileSoft: '#D9EBEB',
+  fertileMuted: '#8BBABA',
+  cycleRing: '#E4E2DC',
+  moodWarm: '#E8B48A',
+  preOvulation: '#D4A84B',
+  preOvulationSoft: '#F5E6C8',
+  ovulation: '#5B8DEF',
+  ovulationSoft: '#D9E6FB',
 };
 
 export const fonts = {

@@ -16,7 +16,7 @@ import HandwrittenNote from '@/components/HandwrittenNote';
 import AuthHero from '@/components/AuthHero';
 import { colors, fonts, radii, shadows } from '@/constants/theme';
 
-const loginHighlights = ['Tarefas do dia', 'Agenda', 'Lembretes'];
+const loginHighlights = ['Ciclo', 'Notas', 'Bem-estar', 'Agenda'];
 
 interface LoginViewProps {
   username: string;
@@ -54,18 +54,19 @@ const LoginView: React.FC<LoginViewProps> = ({
           showsVerticalScrollIndicator={false}
         >
           <AuthHero
-            tagline='Planeje hoje. Construa amanhã.'
+            tagline='Cuidado, ciclo e produtividade em um só lugar.'
             highlights={loginHighlights}
           />
           <View style={styles.header}>
             <HandwrittenNote
-              lines={['Pequenos passos', 'Grandes resultados']}
-              accent='arrow'
+              lines={['Cuide de', 'você']}
+              accent='smile'
               style={styles.note}
             />
-            <Text style={styles.title}>Bem-vindo de volta!</Text>
+            <Text style={styles.title}>Que bom te ver de novo</Text>
             <Text style={styles.subtitle}>
-              Entre para continuar organizando seu dia.
+              Entre para acompanhar seu ciclo, anotar o dia e cuidar da sua
+              rotina com calma.
             </Text>
           </View>
 

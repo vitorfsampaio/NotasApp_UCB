@@ -102,3 +102,81 @@ export interface AuthSession {
   token: string;
   usuario: AuthUser;
 }
+
+export type CyclePhase =
+  | 'period'
+  | 'fertile'
+  | 'follicular'
+  | 'luteal'
+  | 'unknown';
+
+export type CycleFlow = '' | 'spotting' | 'light' | 'medium' | 'heavy';
+
+export type CycleMood =
+  | ''
+  | 'calm'
+  | 'happy'
+  | 'sensitive'
+  | 'anxious'
+  | 'tired'
+  | 'energetic'
+  | 'irritated';
+
+export interface CycleSettings {
+  averageCycleLength: number;
+  averagePeriodLength: number;
+  lutealPhaseLength: number;
+}
+
+export interface CyclePeriod {
+  id: string;
+  startDate: string;
+  endDate: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CycleDailyLog {
+  id: string;
+  date: string;
+  flow: CycleFlow;
+  mood: CycleMood;
+  symptoms: string[];
+  intimacy: boolean;
+  notes: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CycleOverview {
+  settings: CycleSettings;
+  periods: CyclePeriod[];
+  currentCycleDay: number | null;
+  cycleLength: number;
+  periodLength: number;
+  phase: CyclePhase;
+  daysUntilNextPeriod: number | null;
+  nextPeriodStart: string | null;
+  nextPeriodEnd: string | null;
+  fertileWindowStart: string | null;
+  fertileWindowEnd: string | null;
+  ovulationDate: string | null;
+  currentCycleStart: string | null;
+  isPeriodToday: boolean;
+  isFertileToday: boolean;
+  predictionReady: boolean;
+}
+
+export interface PartialCycleLog {
+  date: string;
+  flow: CycleFlow;
+  mood: CycleMood;
+  symptoms: string[];
+  intimacy: boolean;
+  notes: string;
+}
+
+export interface PartialCyclePeriod {
+  startDate: string;
+  endDate?: string | null;
+}

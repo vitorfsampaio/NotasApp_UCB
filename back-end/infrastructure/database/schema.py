@@ -171,6 +171,58 @@ def init_db() -> None:
         ON emergency_attendances (ticket_id, started_at DESC)
         """
       )
+      cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cycle_settings (
+          user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          average_cycle_length INTEGER NOT NULL DEFAULT 28,
+          average_period_length INTEGER NOT NULL DEFAULT 5,
+          luteal_phase_length INTEGER NOT NULL DEFAULT 14,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """
+      )
+      cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cycle_periods (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          start_date DATE NOT NULL,
+          end_date DATE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """
+      )
+      cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_cycle_periods_user_start
+        ON cycle_periods (user_id, start_date DESC)
+        """
+      )
+      cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cycle_daily_logs (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          log_date DATE NOT NULL,
+          flow TEXT NOT NULL DEFAULT '',
+          mood TEXT NOT NULL DEFAULT '',
+          symptoms TEXT[] NOT NULL DEFAULT '{}',
+          intimacy BOOLEAN NOT NULL DEFAULT FALSE,
+          notes TEXT NOT NULL DEFAULT '',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (user_id, log_date)
+        )
+        """
+      )
+      cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_cycle_daily_logs_user_date
+        ON cycle_daily_logs (user_id, log_date DESC)
+        """
+      )
     conn.commit()
   finally:
     conn.close()
